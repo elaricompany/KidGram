@@ -63,7 +63,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.AnimationNotificationsLocker;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
@@ -92,7 +92,6 @@ import java.util.List;
 
 public class ReactionsContainerLayout extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
-    public boolean forceAttachToParent = false;
     public final static Property<ReactionsContainerLayout, Float> TRANSITION_PROGRESS_VALUE = new Property<ReactionsContainerLayout, Float>(Float.class, "transitionProgress") {
         @Override
         public Float get(ReactionsContainerLayout reactionsContainerLayout) {
@@ -504,7 +503,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         if (reactionsWindow != null) {
             return;
         }
-        reactionsWindow = new CustomEmojiReactionsWindow(type, fragment, allReactionsList, selectedReactions, this, resourcesProvider, forceAttachToParent);
+        reactionsWindow = new CustomEmojiReactionsWindow(type, fragment, allReactionsList, selectedReactions, this, resourcesProvider);
         invalidateLoopViews();
         reactionsWindow.onDismissListener(() -> {
             reactionsWindow = null;
@@ -515,10 +514,6 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         });
         onShownCustomEmojiReactionDialog();
         //animatePullingBack();
-    }
-
-    public View getWindowView() {
-        return reactionsWindow == null ? null : reactionsWindow.windowView;
     }
 
     protected void onShownCustomEmojiReactionDialog() {

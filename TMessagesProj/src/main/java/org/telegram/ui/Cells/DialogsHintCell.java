@@ -20,7 +20,7 @@ import androidx.annotation.Nullable;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
@@ -39,7 +39,7 @@ public class DialogsHintCell extends BlurredFrameLayout {
     private final LinearLayout parentView;
     private final LinearLayout contentView;
     public final AnimatedEmojiSpan.TextViewEmojis titleView;
-    public final LinkSpanDrawable.LinksTextView messageView;
+    private final LinkSpanDrawable.LinksTextView messageView;
     private final ImageView chevronView;
     private final ImageView closeView;
     public final BackupImageView imageView;

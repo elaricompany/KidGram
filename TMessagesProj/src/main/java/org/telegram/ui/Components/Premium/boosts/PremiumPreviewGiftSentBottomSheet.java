@@ -23,7 +23,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
@@ -57,7 +57,7 @@ public class PremiumPreviewGiftSentBottomSheet extends PremiumPreviewBottomSheet
     }
 
     public PremiumPreviewGiftSentBottomSheet(BaseFragment fragment, int currentAccount, List<TLRPC.User> selectedUsers, Theme.ResourcesProvider resourcesProvider) {
-        super(fragment, currentAccount, null, null, null, resourcesProvider);
+        super(fragment, currentAccount, null, null, resourcesProvider);
         this.selectedUsers.addAll(selectedUsers);
         init();
     }

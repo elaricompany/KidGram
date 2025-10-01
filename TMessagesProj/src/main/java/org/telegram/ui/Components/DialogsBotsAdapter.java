@@ -25,7 +25,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;

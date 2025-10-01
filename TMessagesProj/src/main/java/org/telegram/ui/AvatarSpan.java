@@ -48,8 +48,6 @@ public class AvatarSpan extends ReplacementSpan {
         setParent(parent);
     }
 
-    public boolean needDrawShadow = true;
-
     public void setSize(float sz) {
         imageReceiver.setRoundRadius(dp(sz));
         this.sz = sz;
@@ -133,19 +131,16 @@ public class AvatarSpan extends ReplacementSpan {
 
     private float translateX, translateY;
     private int shadowPaintAlpha = 0xFF;
-    public boolean usePaintAlpha = true;
 
     @Override
     public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, @NonNull Paint paint) {
-        if (needDrawShadow) {
-            if (shadowPaintAlpha != paint.getAlpha()) {
-                shadowPaint.setAlpha(shadowPaintAlpha = paint.getAlpha());
-                shadowPaint.setShadowLayer(dp(1), 0, dp(.66f), Theme.multAlpha(0x33000000, shadowPaintAlpha / 255f));
-            }
-            canvas.drawCircle(translateX + x + dp(sz) / 2f, translateY + (top + bottom) / 2f, dp(sz) / 2f, shadowPaint);
+        if (shadowPaintAlpha != paint.getAlpha()) {
+            shadowPaint.setAlpha(shadowPaintAlpha = paint.getAlpha());
+            shadowPaint.setShadowLayer(dp(1), 0, dp(.66f), Theme.multAlpha(0x33000000, shadowPaintAlpha / 255f));
         }
+        canvas.drawCircle(translateX + x + dp(sz) / 2f, translateY + (top + bottom) / 2f, dp(sz) / 2f, shadowPaint);
         imageReceiver.setImageCoords(translateX + x, translateY + (top + bottom) / 2f - dp(sz) / 2f, dp(sz), dp(sz));
-        imageReceiver.setAlpha(usePaintAlpha ? paint.getAlpha() / 255f : 1.0f);
+        imageReceiver.setAlpha(paint.getAlpha() / 255f);
         imageReceiver.draw(canvas);
     }
 

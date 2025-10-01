@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -64,8 +64,6 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
     protected int headerHeight = 0;
     protected int headerPaddingTop = 0;
     protected int headerPaddingBottom = 0;
-    protected int headerMoveTop = 0;
-    protected boolean ignoreTouchActionBar = true;
     protected boolean actionBarIgnoreTouchEvents = false;
     protected AnimatedFloat actionBarSlideProgress;
 
@@ -370,7 +368,7 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
 
                 @Override
                 public boolean dispatchTouchEvent(MotionEvent ev) {
-                    if (ignoreTouchActionBar && actionBarIgnoreTouchEvents) {
+                    if (actionBarIgnoreTouchEvents) {
                         return false;
                     }
                     return super.dispatchTouchEvent(ev);
@@ -427,34 +425,6 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
 
     public boolean reverseLayout;
 
-    private class PaddingView extends View {
-
-        public PaddingView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int h;
-            if (contentHeight == 0) {
-                h = dp(300);
-            } else {
-                h = (int) (contentHeight * topPadding);
-            }
-            h -= headerTotalHeight - headerHeight - headerPaddingTop - headerPaddingBottom;
-            if (h < 1) {
-                h = 1;
-            }
-            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY));
-        }
-
-        @Override
-        public void setTranslationY(float translationY) {
-            super.setTranslationY(translationY);
-            containerView.invalidate();
-        }
-    }
-
     protected void resetAdapter(Context context) {
         RecyclerListView.SelectionAdapter adapter = createAdapter(recyclerListView);
         RecyclerListView.SelectionAdapter wrapperAdapter = new RecyclerListView.SelectionAdapter() {
@@ -468,7 +438,29 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 if (viewType == -1000) {
-                    return new RecyclerListView.Holder(new PaddingView(context));
+                    View view = new View(context) {
+                        @Override
+                        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                            int h;
+                            if (contentHeight == 0) {
+                                h = dp(300);
+                            } else {
+                                h = (int) (contentHeight * topPadding);
+                            }
+                            h -= headerTotalHeight - headerHeight - headerPaddingTop - headerPaddingBottom;
+                            if (h < 1) {
+                                h = 1;
+                            }
+                            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY));
+                        }
+
+                        @Override
+                        public void setTranslationY(float translationY) {
+                            super.setTranslationY(translationY);
+                            containerView.invalidate();
+                        }
+                    };
+                    return new RecyclerListView.Holder(view);
                 }
                 return adapter.onCreateViewHolder(parent, viewType);
             }
@@ -593,7 +585,6 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
                 }
             }
             top -= headerHeight + headerPaddingTop + headerPaddingBottom;
-            top += headerMoveTop;
             if (showHandle && handleOffset) {
                 top -= dp(actionBarType == ActionBarType.SLIDING ? 8 : 16);
             }
@@ -607,7 +598,7 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
                 }
                 AndroidUtilities.updateViewVisibilityAnimated(actionBar, progressToFullView != 0f, 1f, wasDrawn);
             } else if (actionBarType == ActionBarType.SLIDING) {
-                float actionBarY = Math.max(top - headerMoveTop + dp(8) + headerPaddingTop - AndroidUtilities.statusBarHeight, 0.0f);
+                float actionBarY = Math.max(top + dp(8) + headerPaddingTop - AndroidUtilities.statusBarHeight, 0.0f);
                 float t = actionBarSlideProgress.set(actionBarY == 0.0f ? 1.0f : 0.0f);
 
                 if (t != 0 && t != 1) {

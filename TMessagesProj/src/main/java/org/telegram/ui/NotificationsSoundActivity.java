@@ -42,7 +42,7 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
 import org.telegram.tgnet.TLRPC;

@@ -13,7 +13,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
@@ -61,21 +61,22 @@ public class PermissionRequest {
                 }
             }
             if (needsPermissionRationale) {
-                new AlertDialog.Builder(activity, null)
-                    .setTopAnimation(iconResId, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground))
-                    .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(stringResId)))
-                    .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
-                        try {
-                            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
-                            activity.startActivity(intent);
-                        } catch (Exception e) {
-                            FileLog.e(e);
-                        }
-                    })
-                    .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
-                    .create()
-                    .show();
+                //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                new AlertDialog.Builder(activity, null)
+//                    .setTopAnimation(iconResId, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground))
+//                    .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(stringResId)))
+//                    .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
+//                        try {
+//                            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                            intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
+//                            activity.startActivity(intent);
+//                        } catch (Exception e) {
+//                            FileLog.e(e);
+//                        }
+//                    })
+//                    .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
+//                    .create()
+//                    .show();
                 if (whenDone != null) whenDone.run(false);
                 return;
             }
@@ -124,21 +125,22 @@ public class PermissionRequest {
                 }
             }
             if (needsPermissionRationale) {
-                new AlertDialog.Builder(activity, null)
-                        .setTopAnimation(iconResId, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground))
-                        .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(stringResId)))
-                        .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
-                            try {
-                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
-                                activity.startActivity(intent);
-                            } catch (Exception e) {
-                                FileLog.e(e);
-                            }
-                        })
-                        .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
-                        .create()
-                        .show();
+                //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                new AlertDialog.Builder(activity, null)
+//                        .setTopAnimation(iconResId, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground))
+//                        .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(stringResId)))
+//                        .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
+//                            try {
+//                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                                intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
+//                                activity.startActivity(intent);
+//                            } catch (Exception e) {
+//                                FileLog.e(e);
+//                            }
+//                        })
+//                        .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
+//                        .create()
+//                        .show();
                 if (whenDone != null) whenDone.run(false);
                 return;
             }

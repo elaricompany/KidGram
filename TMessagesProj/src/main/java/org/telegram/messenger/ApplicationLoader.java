@@ -143,10 +143,6 @@ public class ApplicationLoader extends Application {
         return applicationLoaderInstance.isBeta();
     }
 
-    public static boolean isAndroidTestEnvironment() {
-        return applicationLoaderInstance.isAndroidTestEnv();
-    }
-
     protected boolean isHuaweiBuild() {
         return false;
     }
@@ -156,10 +152,6 @@ public class ApplicationLoader extends Application {
     }
 
     protected boolean isBeta() {
-        return false;
-    }
-
-    protected boolean isAndroidTestEnv() {
         return false;
     }
 
@@ -179,19 +171,6 @@ public class ApplicationLoader extends Application {
             FileLog.e(e);
         }
         return new File("/data/data/org.telegram.messenger/files");
-    }
-
-    public static File getFilesDirFixed(String child) {
-        try {
-            File path = getFilesDirFixed();
-            File dir = new File(path, child);
-            dir.mkdirs();
-
-            return dir;
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
-        return null;
     }
 
     public static void postInitApplication() {

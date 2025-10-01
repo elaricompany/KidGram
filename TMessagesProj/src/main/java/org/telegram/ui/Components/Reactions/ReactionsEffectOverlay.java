@@ -23,7 +23,7 @@ import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -331,10 +331,8 @@ public class ReactionsEffectOverlay {
                         if (messageCell.drawPinnedBottom && !messageCell.shouldDrawTimeOnMedia()) {
                             toY += AndroidUtilities.dp(2);
                         }
-                        toY += messageCell.getPaddingTop();
                     } else if (drawingCell instanceof ChatActionCell) {
                         reactionButton = ((ChatActionCell) drawingCell).getReactionButton(reaction);
-                        toY += drawingCell.getPaddingTop();
                     }
                     if (reactionButton != null) {
                         toX += reactionButton.drawingImageRect.left;

@@ -238,12 +238,8 @@ public class VoIPNotificationsLayout extends LinearLayout {
                     maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
                     false, TextUtils.TruncateAt.END, maxWidth, 10);
             int maxRowLength = 0;
-            if (staticLayout != null) {
-                for (int a = 0; a < staticLayout.getLineCount(); ++a) {
-                    maxRowLength = (int) Math.max(maxRowLength, Math.ceil(staticLayout.getLineWidth(a)));
-                }
-            } else {
-                maxRowLength = maxWidth;
+            for (int a = 0; a < staticLayout.getLineCount(); ++a) {
+                maxRowLength = (int) Math.max(maxRowLength, Math.ceil(staticLayout.getLineWidth(a)));
             }
             textView.setMaxWidth(maxRowLength);
             textView.setText(text);

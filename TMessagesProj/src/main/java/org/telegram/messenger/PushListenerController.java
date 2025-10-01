@@ -16,9 +16,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import org.elarikg.messenger.R;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
+import org.telegram.elari.elariapi.pojo.ChatAccess;
 import org.telegram.messenger.voip.VoIPGroupNotification;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
@@ -27,8 +33,10 @@ import org.telegram.tgnet.TLRPC;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
@@ -650,11 +658,6 @@ public class PushListenerController {
                                             message1 = getString(R.string.Poll);
                                             break;
                                         }
-                                        case "MESSAGE_TODO": {
-                                            messageText = LocaleController.formatString(R.string.NotificationMessageTodo2, args[0], args[1]);
-                                            message1 = getString(R.string.Todo);
-                                            break;
-                                        }
                                         case "MESSAGE_GEO": {
                                             messageText = LocaleController.formatString("NotificationMessageMap", R.string.NotificationMessageMap, args[0]);
                                             message1 = getString(R.string.AttachLocation);
@@ -804,21 +807,8 @@ public class PushListenerController {
                                             break;
                                         }
                                         case "CHANNEL_MESSAGE_POLL": {
-                                            messageText = LocaleController.formatString(R.string.ChannelMessagePoll2, args[0], args[1]);
+                                            messageText = LocaleController.formatString("ChannelMessagePoll2", R.string.ChannelMessagePoll2, args[0], args[1]);
                                             message1 = getString(R.string.Poll);
-                                            break;
-                                        }
-                                        case "CHANNEL_MESSAGE_TODO": {
-                                            messageText = LocaleController.formatString(R.string.ChannelMessageTodo2, args[0], args[1]);
-                                            message1 = getString(R.string.Todo);
-                                            break;
-                                        }
-                                        case "CHANNEL_MESSAGE_TODO_DONE": {
-                                            messageText = LocaleController.formatString(R.string.ChannelMessageTodoDone2, args[0], args[2]);
-                                            break;
-                                        }
-                                        case "CHANNEL_MESSAGE_TODO_APPEND": {
-                                            messageText = LocaleController.formatString(R.string.ChannelMessageTodoAppend2, args[0], args[2]);
                                             break;
                                         }
                                         case "CHANNEL_MESSAGE_GEO": {
@@ -946,21 +936,8 @@ public class PushListenerController {
                                             break;
                                         }
                                         case "CHAT_MESSAGE_POLL": {
-                                            messageText = LocaleController.formatString(R.string.NotificationMessageGroupPoll2, args[0], args[1], args[2]);
+                                            messageText = LocaleController.formatString("NotificationMessageGroupPoll2", R.string.NotificationMessageGroupPoll2, args[0], args[1], args[2]);
                                             message1 = getString(R.string.Poll);
-                                            break;
-                                        }
-                                        case "CHAT_MESSAGE_TODO": {
-                                            messageText = LocaleController.formatString(R.string.NotificationMessageGroupTodo2, args[0], args[1], args[2]);
-                                            message1 = getString(R.string.Todo);
-                                            break;
-                                        }
-                                        case "CHAT_MESSAGE_TODO_DONE": {
-                                            messageText = LocaleController.formatString(R.string.NotificationMessageGroupTodoDone2, args[0], args[1], args[2]);
-                                            break;
-                                        }
-                                        case "CHAT_MESSAGE_TODO_APPEND": {
-                                            messageText = LocaleController.formatString(R.string.NotificationMessageGroupTodoAppend2, args[0], args[1], args[2]);
                                             break;
                                         }
                                         case "CHAT_MESSAGE_GEO": {
@@ -1227,18 +1204,6 @@ public class PushListenerController {
                                             }
                                             break;
                                         }
-                                        case "PINNED_TODO": {
-                                            if (dialogId > 0) {
-                                                messageText = LocaleController.formatString(R.string.NotificationActionPinnedTodoUser, args[0], args[1]);
-                                            } else {
-                                                if (isGroup) {
-                                                    messageText = LocaleController.formatString(R.string.NotificationActionPinnedTodo2, args[0], args[2], args[1]);
-                                                } else {
-                                                    messageText = LocaleController.formatString(R.string.NotificationActionPinnedTodoChannel2, args[0], args[1]);
-                                                }
-                                            }
-                                            break;
-                                        }
                                         case "PINNED_GEO": {
                                             if (dialogId > 0) {
                                                 messageText = LocaleController.formatString(R.string.NotificationActionPinnedGeoUser, args[0], args[1]);
@@ -1499,9 +1464,6 @@ public class PushListenerController {
             case "REACT_POLL": {
                 return LocaleController.formatString(R.string.PushReactPoll, args);
             }
-            case "REACT_TODO": {
-                return LocaleController.formatString(R.string.PushReactTodo, args);
-            }
             case "REACT_QUIZ": {
                 return LocaleController.formatString(R.string.PushReactQuiz, args);
             }
@@ -1555,9 +1517,6 @@ public class PushListenerController {
             }
             case "CHAT_REACT_POLL": {
                 return LocaleController.formatString(R.string.PushChatReactPoll, args);
-            }
-            case "CHAT_REACT_TODO": {
-                return LocaleController.formatString(R.string.PushChatReactTodo, args);
             }
             case "CHAT_REACT_QUIZ": {
                 return LocaleController.formatString(R.string.PushChatReactQuiz, args);
@@ -1636,6 +1595,7 @@ public class PushListenerController {
                     FirebaseApp.initializeApp(ApplicationLoader.applicationContext);
                     FirebaseMessaging.getInstance().getToken()
                             .addOnCompleteListener(task -> {
+
                                 SharedConfig.pushStringGetTimeEnd = SystemClock.elapsedRealtime();
                                 if (!task.isSuccessful()) {
                                     if (BuildVars.LOGS_ENABLED) {
@@ -1646,6 +1606,7 @@ public class PushListenerController {
                                     return;
                                 }
                                 String token = task.getResult();
+//Log.e("ArtTest", "token - " + token);
                                 if (!TextUtils.isEmpty(token)) {
                                     PushListenerController.sendRegistrationToServer(getPushType(), token);
                                 }

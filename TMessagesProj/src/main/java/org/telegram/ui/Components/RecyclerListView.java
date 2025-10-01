@@ -57,7 +57,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatActionCell;
@@ -1164,8 +1164,6 @@ public class RecyclerListView extends RecyclerView {
                         final View child = viewGroup.getChildAt(i);
                         if (x >= child.getLeft() && x <= child.getRight() && y >= child.getTop() && y <= child.getBottom()) {
                             if (child.isClickable()) {
-                                // todo: recursion search ???
-
                                 currentChildView = null;
                                 break;
                             }
@@ -1354,7 +1352,7 @@ public class RecyclerListView extends RecyclerView {
         resetSelectorOnChanged = value;
     }
 
-    private final AdapterDataObserver observer = new AdapterDataObserver() {
+    private AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onChanged() {
             checkIfEmpty(true);

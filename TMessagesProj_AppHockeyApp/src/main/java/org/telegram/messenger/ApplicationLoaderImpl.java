@@ -20,7 +20,7 @@ import com.microsoft.appcenter.analytics.EventProperties;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.distribute.Distribute;
 
-import org.telegram.messenger.regular.BuildConfig;
+import org.elarikg.messenger.regular.BuildConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.UpdateAppAlertDialog;
@@ -39,21 +39,9 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
     }
 
 
-    private String getVersionName(int code) {
-        switch (code) {
-            case 0: return "local-debug";
-            case 1: return "private";
-            case 4: return "public";
-            case 5: return "hardcore";
-            case 6: return "standalone";
-            case 7: return "release";
-            default: return "unknown";
-        }
-    }
-
     @Override
     protected void startAppCenterInternal(Activity context) {
-        if (org.telegram.messenger.BuildConfig.DEBUG) {
+        if (org.elarikg.messenger.BuildConfig.DEBUG) {
             return;
         }
         try {
@@ -67,7 +55,7 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
 
                 final FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
                 crashlytics.setUserId(userId);
-                crashlytics.setCustomKey("version", getVersionName(org.telegram.messenger.BuildConfig.VERSION_NUM));
+                crashlytics.setCustomKey("version", BuildVars.DEBUG_PRIVATE_VERSION ? "private" : "public");
                 crashlytics.setCustomKey("model", Build.MODEL);
                 crashlytics.setCustomKey("manufacturer", Build.MANUFACTURER);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -82,7 +70,7 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
             }
             if (BuildVars.DEBUG_VERSION) {
                 Distribute.setEnabledForDebuggableBuild(true);
-                String appHash = org.telegram.messenger.BuildConfig.APP_CENTER_HASH;
+                String appHash = org.elarikg.messenger.BuildConfig.APP_CENTER_HASH;
                 if (TextUtils.isEmpty(appHash)) {
                     throw new RuntimeException("App Center hash is empty. add to local.properties field APP_CENTER_HASH_PRIVATE and APP_CENTER_HASH_PUBLIC");
                 }
@@ -104,13 +92,7 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
                 props.set("hardware", Build.HARDWARE);
                 props.set("user", Build.USER);
                 AppCenter.setCustomProperties(props);
-                String userId = "uid=" + UserConfig.getInstance(UserConfig.selectedAccount).clientUserId;
-                if (UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser() != null) {
-                    final String username = UserObject.getPublicUsername(UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser());
-                    if (!TextUtils.isEmpty(username))
-                        userId += " @" + username;
-                }
-                AppCenter.setUserId(userId);
+                AppCenter.setUserId("uid=" + UserConfig.getInstance(UserConfig.selectedAccount).clientUserId);
             }
         } catch (Throwable e) {
             FileLog.e(e);
@@ -204,7 +186,7 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
 
     @Override
     public boolean isCustomUpdate() {
-        return !TextUtils.isEmpty(org.telegram.messenger.BuildConfig.BETA_URL);
+        return !TextUtils.isEmpty(org.elarikg.messenger.BuildConfig.BETA_URL);
     }
 
     @Override

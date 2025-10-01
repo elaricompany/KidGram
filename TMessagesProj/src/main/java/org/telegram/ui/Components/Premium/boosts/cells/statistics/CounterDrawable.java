@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 
 public class CounterDrawable extends Drawable {
 

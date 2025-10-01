@@ -1,7 +1,14 @@
-## Telegram messenger for Android
+## KidGram is an unofficial Telegram client
 
-[Telegram](https://telegram.org) is a messaging app with a focus on speed and security. It’s superfast, simple and free.
-This repo contains the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
+The development of the main functionality is made by the [Telegram](https://telegram.org) team which creates the most advanced and sophisticated messenger in the world. Telegram provides the opportunity to use its [open code](https://telegram.org/apps#source-code) and API to implement brand-new solutions. The KidGram team develops and adds new features in the messenger without breaking user privacy and violating security principles, enjoying the benefits provided by Telegram.
+
+Download KidGram from the [Google Play](https://play.google.com/store/apps/details?id=net.elari.kidgram) and [Apple Store]!
+
+Download parental app ELARI SafeFamily from the [Google Play](https://play.google.com/store/apps/details?id=com.wherecom.elarisafefamily) and [Apple Store](https://apps.apple.com/us/app/elari-safefamily/id1248264581)!
+
+[Privacy policy](https://elari.it/privacy_policy)
+
+
 
 ## Creating your Telegram Application
 

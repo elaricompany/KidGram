@@ -30,7 +30,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.ShareBroadcastReceiver;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
@@ -329,7 +329,6 @@ public class Browser {
                         if (response instanceof TL_account.webPagePreview) {
                             final TL_account.webPagePreview preview = (TL_account.webPagePreview) response;
                             MessagesController.getInstance(currentAccount).putUsers(preview.users, false);
-                            MessagesController.getInstance(currentAccount).putChats(preview.chats, false);
                             if (preview.media instanceof TLRPC.TL_messageMediaWebPage) {
                                 TLRPC.TL_messageMediaWebPage webPage = (TLRPC.TL_messageMediaWebPage) preview.media;
                                 if (webPage.webpage instanceof TLRPC.TL_webPage && webPage.webpage.cached_page != null) {

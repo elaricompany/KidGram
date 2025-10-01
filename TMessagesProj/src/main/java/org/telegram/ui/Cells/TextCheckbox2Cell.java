@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimationProperties;
 import org.telegram.ui.Components.CheckBox2;
@@ -97,10 +97,6 @@ public class TextCheckbox2Cell extends FrameLayout {
         addView(checkbox, LayoutHelper.createFrame(20, 20, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, 22, 0, 22, 0));
 
         setClipChildren(false);
-    }
-
-    public void setCheckboxGravityTop() {
-        checkbox.setLayoutParams(LayoutHelper.createFrame(20, 20, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 22, 22, 22, 0));
     }
 
     @Override

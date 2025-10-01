@@ -61,7 +61,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -686,7 +686,7 @@ public class NotificationsCustomSettingsActivity extends BaseFragment implements
                     }
                 }, getResourceProvider());
                 chatNotificationsPopupWrapper.update(did, topicId, null);
-                chatNotificationsPopupWrapper.showAsOptions(NotificationsCustomSettingsActivity.this, view, x, y, false);
+                chatNotificationsPopupWrapper.showAsOptions(NotificationsCustomSettingsActivity.this, view, x, y);
                 return;
             }
             if (item == null) {

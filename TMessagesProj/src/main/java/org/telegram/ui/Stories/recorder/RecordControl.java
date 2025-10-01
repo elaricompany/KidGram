@@ -39,7 +39,7 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -68,9 +68,6 @@ public class RecordControl extends View implements FlashViews.Invertable {
         boolean canRecordAudio();
         void onCheckClick();
 
-        default long getMaxVisibleVideoDuration() {
-            return 60_000L;
-        }
         default long getMaxVideoDuration() {
             return 60 * 1000L;
         }
@@ -446,8 +443,7 @@ public class RecordControl extends View implements FlashViews.Invertable {
         final long duration = System.currentTimeMillis() - recordingStart;
         final float recordEndT = recording ? 0 : 1f - recordingLongT;
         final long maxDuration = delegate != null ? delegate.getMaxVideoDuration() : 60_000;
-        final long maxVisibleDuration = delegate != null ? delegate.getMaxVisibleVideoDuration() : 60_000;
-        final float sweepAngle = Math.min(duration / (float) (maxVisibleDuration < 0 ? 60_000 : maxVisibleDuration) * 360, 360);
+        final float sweepAngle = Math.min(duration / (float) (maxDuration < 0 ? 60_000 : maxDuration) * 360, 360);
 
         final float recordingLoading = this.recordingLoadingT.set(this.recordingLoading);
 

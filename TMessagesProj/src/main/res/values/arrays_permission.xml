@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="permission_group_contacts">
+        <item>android.permission.GET_ACCOUNTS</item>
+        <item>android.permission.WRITE_CONTACTS</item>
+        <item>android.permission.READ_CONTACTS</item>
+    </string-array>
+
+    <string-array name="permission_group_phone">
+        <item>android.permission.READ_CALL_LOG</item>
+        <item>android.permission.READ_PHONE_STATE</item>
+        <item>android.permission.CALL_PHONE</item>
+        <item>android.permission.WRITE_CALL_LOG</item>
+        <item>android.permission.USE_SIP</item>
+        <item>android.permission.PROCESS_OUTGOING_CALLS</item>
+        <item>com.android.voicemail.permission.ADD_VOICEMAIL</item>
+    </string-array>
+
+    <string-array name="permission_group_calendar">
+        <item>android.permission.READ_CALENDAR</item>
+        <item>android.permission.WRITE_CALENDAR</item>
+    </string-array>
+
+    <string-array name="permission_group_camera">
+        <item>android.permission.CAMERA</item>
+    </string-array>
+
+    <string-array name="permission_group_sensors">
+        <item>android.permission.BODY_SENSORS</item>
+    </string-array>
+
+    <string-array name="permission_group_location">
+        <item>android.permission.ACCESS_FINE_LOCATION</item>
+        <item>android.permission.ACCESS_COARSE_LOCATION</item>
+    </string-array>
+
+    <string-array name="permission_group_storage">
+        <item>android.permission.READ_EXTERNAL_STORAGE</item>
+        <item>android.permission.WRITE_EXTERNAL_STORAGE</item>
+    </string-array>
+
+    <string-array name="permission_group_mircrophone">
+        <item>android.permission.RECORD_AUDIO</item>
+    </string-array>
+
+    <string-array name="permission_group_sms">
+        <item>android.permission.READ_SMS</item>
+        <item>android.permission.RECEIVE_WAP_PUSH</item>
+        <item>android.permission.RECEIVE_MMS</item>
+        <item>android.permission.RECEIVE_SMS</item>
+        <item>android.permission.SEND_SMS</item>
+        <item>android.permission.READ_CELL_BROADCASTS</item>
+    </string-array>
+</resources>

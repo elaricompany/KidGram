@@ -11,6 +11,7 @@ package org.telegram.ui.Cells;
 import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.content.Context;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -22,14 +23,21 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -45,9 +53,13 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+
 public class HintDialogCell extends FrameLayout {
 
     private BackupImageView imageView;
+    private ImageView blurImg;
+//    private TextView textBlur;
     private TextView nameTextView;
     private AvatarDrawable avatarDrawable = new AvatarDrawable();
     private RectF rect = new RectF();
@@ -82,6 +94,18 @@ public class HintDialogCell extends FrameLayout {
         imageView = new BackupImageView(context);
         imageView.setRoundRadius(AndroidUtilities.dp(27));
         addView(imageView, LayoutHelper.createFrame(54, 54, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 7, 0, 0));
+
+        blurImg = new ImageView(context);
+        addView(blurImg, LayoutHelper.createFrame(54, 54, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 7, 0, 0));
+        blurImg.setImageDrawable(getResources().getDrawable(R.drawable.blur3));
+
+//        textBlur = new TextView(context);
+//        addView(textBlur, LayoutHelper.createFrame(54, 54, Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 7, 0, 0));
+//        textBlur.setText("AA");
+//        textBlur.setTextSize(26);
+//        float radius = 10.2f;
+//        BlurMaskFilter filter = new BlurMaskFilter(radius, BlurMaskFilter.Blur.NORMAL);
+//        textBlur.getPaint().setMaskFilter(filter);
 
         nameTextView = new TextView(context) {
             @Override
@@ -152,6 +176,7 @@ public class HintDialogCell extends FrameLayout {
         if ((mask & MessagesController.UPDATE_MASK_STATUS) != 0) {
             if (currentUser != null) {
                 currentUser = MessagesController.getInstance(currentAccount).getUser(currentUser.id);
+                blurImg.setVisibility(((ElariUtils.isNeedAvatarBlur()) && (ElariUtils.getAccess(currentUser.id) != C.ACCESS_ALLOWED)) ? VISIBLE : GONE);
                 imageView.invalidate();
                 invalidate();
             }
@@ -161,6 +186,7 @@ public class HintDialogCell extends FrameLayout {
         }
         TLRPC.Dialog dialog = MessagesController.getInstance(currentAccount).dialogs_dict.get(dialogId);
         if (dialog != null && dialog.unread_count != 0) {
+            blurImg.setVisibility(((ElariUtils.isNeedAvatarBlur()) && (ElariUtils.getAccess(dialogId) != C.ACCESS_ALLOWED)) ? VISIBLE : GONE);
             if (lastUnreadCount != dialog.unread_count) {
                 lastUnreadCount = dialog.unread_count;
                 counterView.setCount(lastUnreadCount, wasDraw);

@@ -47,6 +47,8 @@ import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.billingclient.api.ProductDetails;
 
+import org.elarikg.messenger.BuildConfig;
+import org.elarikg.messenger.R;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
@@ -82,7 +84,6 @@ import org.telegram.ui.Components.URLSpanReplacement;
 import org.telegram.ui.Components.URLSpanUserMention;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
-import org.telegram.messenger.utils.tlutils.AmountUtils;
 import org.telegram.ui.Stories.StoriesStorage;
 
 import java.io.File;
@@ -185,7 +186,7 @@ public class MediaDataController extends BaseController {
                             threads = new LongSparseArray<>();
                             drafts.put(did, threads);
                         }
-                        long threadId = key.startsWith("t_") ? Utilities.parseLong(key.substring(key.lastIndexOf('_') + 1)) : 0;
+                        long threadId = key.startsWith("t_") ? Utilities.parseInt(key.substring(key.lastIndexOf('_') + 1)) : 0;
                         threads.put(threadId, draftMessage);
                     }
                 }
@@ -307,7 +308,6 @@ public class MediaDataController extends BaseController {
     private boolean recentGifsLoaded;
 
     private boolean loadingPremiumGiftStickers;
-    private boolean loadingPremiumTonStickers;
     private boolean loadingGenericAnimations;
     private boolean loadingDefaultTopicIcons;
 
@@ -1304,9 +1304,6 @@ public class MediaDataController extends BaseController {
             return "defaultTopicIcons";
         if (i instanceof TLRPC.TL_inputStickerSetEmojiDefaultStatuses)
             return "emojiDefaultStatuses";
-        if (i instanceof TLRPC.TL_inputStickerSetTonGifts) {
-            return "tonGifts";
-        }
         return "null";
     }
 
@@ -2671,38 +2668,6 @@ public class MediaDataController extends BaseController {
         }));
     }
 
-    public void checkTonGiftStickers() {
-        if (getUserConfig().premiumTonStickerPack != null) {
-            String packName = getUserConfig().premiumTonStickerPack;
-            TLRPC.TL_messages_stickerSet set = getStickerSetByName(packName);
-            if (set == null) {
-                set = getStickerSetByEmojiOrName(packName);
-            }
-            if (set == null) {
-                MediaDataController.getInstance(currentAccount).loadStickersByEmojiOrName(packName, false, true);
-            }
-        }
-        if (loadingPremiumTonStickers || System.currentTimeMillis() - getUserConfig().lastUpdatedTonGiftsStickerPack < 86400000) {
-            return;
-        }
-        loadingPremiumTonStickers = true;
-
-        TLRPC.TL_messages_getStickerSet req = new TLRPC.TL_messages_getStickerSet();
-        req.stickerset = new TLRPC.TL_inputStickerSetTonGifts();
-        getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-            if (response instanceof TLRPC.TL_messages_stickerSet) {
-                TLRPC.TL_messages_stickerSet stickerSet = (TLRPC.TL_messages_stickerSet) response;
-                getUserConfig().premiumTonStickerPack = stickerSet.set.short_name;
-                getUserConfig().lastUpdatedTonGiftsStickerPack = System.currentTimeMillis();
-                getUserConfig().saveConfig(false);
-
-                processLoadedDiceStickers(getUserConfig().premiumTonStickerPack, false, stickerSet, false, (int) (System.currentTimeMillis() / 1000));
-
-                getNotificationCenter().postNotificationName(NotificationCenter.didUpdateTonGiftStickers);
-            }
-        }));
-    }
-
     public void checkGenericAnimations() {
         if (getUserConfig().genericAnimationsStickerPack != null) {
             String packName = getUserConfig().genericAnimationsStickerPack;
@@ -3889,7 +3854,7 @@ public class MediaDataController extends BaseController {
                     req.flags |= 1;
                 }
                 if (replyMessageId != 0) {
-                    if (dialogId == getUserConfig().getClientUserId() || getMessagesStorage().isMonoForum(queryWithDialog)) {
+                    if (dialogId == getUserConfig().getClientUserId()) {
                         req.saved_peer_id = getMessagesController().getInputPeer(replyMessageId);
                         req.flags |= 4;
                     } else {
@@ -3974,7 +3939,7 @@ public class MediaDataController extends BaseController {
             }, true);
         }
         if (lastReplyMessageId != 0) {
-            if (queryWithDialog == getUserConfig().getClientUserId() || getMessagesStorage().isMonoForum(queryWithDialog)) {
+            if (queryWithDialog == getUserConfig().getClientUserId()) {
                 req.saved_peer_id = getMessagesController().getInputPeer(lastReplyMessageId);
                 req.flags |= 4;
             } else {
@@ -4462,7 +4427,7 @@ public class MediaDataController extends BaseController {
                     });
                 };
 
-                if (getMessagesController().getTranslateController().isFeatureAvailable(dialogId)) {
+                if (getMessagesController().getTranslateController().isFeatureAvailable()) {
                     getMessagesStorage().getStorageQueue().postRunnable(() -> {
                         for (int i = 0; i < objects.size(); ++i) {
                            MessageObject messageObject = objects.get(i);
@@ -5425,15 +5390,6 @@ public class MediaDataController extends BaseController {
         }
     }
 
-    public boolean containsTopPeer(long uid) {
-        for (int a = 0; a < hints.size(); a++) {
-            if (DialogObject.getPeerDialogId(hints.get(a).peer) == uid) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void removePeer(long uid) {
         for (int a = 0; a < hints.size(); a++) {
             if (hints.get(a).peer.user_id == uid) {
@@ -6270,8 +6226,6 @@ public class MediaDataController extends BaseController {
                                 messageObject.generatePaymentSentMessageText(null, false);
                             } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPaymentSentMe) {
                                 messageObject.generatePaymentSentMessageText(null, true);
-                            } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionSuggestedPostApproval) {
-                                messageObject.generateSuggestionApprovalMessageText();
                             }
                             break;
                         }
@@ -6744,8 +6698,6 @@ public class MediaDataController extends BaseController {
                             m.generatePaymentSentMessageText(null, false);
                         } else if (m.messageOwner.action instanceof TLRPC.TL_messageActionPaymentSentMe) {
                             m.generatePaymentSentMessageText(null, true);
-                        }else if (m.messageOwner.action instanceof TLRPC.TL_messageActionSuggestedPostApproval) {
-                            m.generateSuggestionApprovalMessageText();
                         }
                     }
                     changed = true;
@@ -7560,10 +7512,10 @@ public class MediaDataController extends BaseController {
     }
 
     public void saveDraft(long dialogId, int threadId, CharSequence message, ArrayList<TLRPC.MessageEntity> entities, TLRPC.Message replyToMessage, boolean noWebpage, long effectId) {
-        saveDraft(dialogId, threadId, message, entities, replyToMessage, null, null, effectId, noWebpage, false);
+        saveDraft(dialogId, threadId, message, entities, replyToMessage, null, effectId, noWebpage, false);
     }
 
-    public void saveDraft(long dialogId, long threadId, CharSequence message, ArrayList<TLRPC.MessageEntity> entities, TLRPC.Message replyToMessage, ChatActivity.ReplyQuote quote, TLRPC.SuggestedPost suggestedPost, long effectId, boolean noWebpage, boolean clean) {
+    public void saveDraft(long dialogId, long threadId, CharSequence message, ArrayList<TLRPC.MessageEntity> entities, TLRPC.Message replyToMessage, ChatActivity.ReplyQuote quote, long effectId, boolean noWebpage, boolean clean) {
         TLRPC.DraftMessage draftMessage;
         if (getMessagesController().isForum(dialogId) && threadId == 0) {
             replyToMessage = null;
@@ -7614,36 +7566,23 @@ public class MediaDataController extends BaseController {
             draftMessage.flags |= 8;
         }
 
-        final TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
-        if (ChatObject.isMonoForum(chat) && ChatObject.canManageMonoForum(currentAccount, chat)) {
-            draftMessage.flags |= 16;
-            if (draftMessage.reply_to == null) {
-                draftMessage.reply_to = new TLRPC.TL_inputReplyToMonoForum();
-                draftMessage.reply_to.monoforum_peer_id = getMessagesController().getInputPeer(threadId);
-            } else {
-                draftMessage.reply_to.monoforum_peer_id = getMessagesController().getInputPeer(threadId);
-                draftMessage.reply_to.flags |= 32;
-            }
-        }
-        if (suggestedPost != null) {
-            draftMessage.suggested_post = suggestedPost;
-        }
-
         LongSparseArray<TLRPC.DraftMessage> threads = drafts.get(dialogId);
         TLRPC.DraftMessage currentDraft = threads == null ? null : threads.get(threadId);
         if (!clean) {
             boolean sameDraft;
             if (currentDraft != null) {
-                sameDraft = (currentDraft.message.equals(draftMessage.message)
-                    && replyToEquals(currentDraft.reply_to, draftMessage.reply_to)
-                    && suggestedPostEquals(currentDraft.suggested_post, draftMessage.suggested_post)
-                    && currentDraft.no_webpage == draftMessage.no_webpage
-                    && currentDraft.effect == draftMessage.effect);
+                sameDraft = (
+                    currentDraft.message.equals(draftMessage.message) &&
+                    replyToEquals(currentDraft.reply_to, draftMessage.reply_to) &&
+                    currentDraft.no_webpage == draftMessage.no_webpage &&
+                    currentDraft.effect == draftMessage.effect
+                );
             } else {
-                sameDraft = (TextUtils.isEmpty(draftMessage.message)
-                    && (draftMessage.reply_to == null || draftMessage.reply_to.reply_to_msg_id == 0)
-                    && draftMessage.effect == 0
-                    && draftMessage.suggested_post == null);
+                sameDraft = (
+                    TextUtils.isEmpty(draftMessage.message) &&
+                    (draftMessage.reply_to == null || draftMessage.reply_to.reply_to_msg_id == 0) &&
+                    draftMessage.effect == 0
+                );
             }
             if (sameDraft) {
                 return;
@@ -7652,7 +7591,7 @@ public class MediaDataController extends BaseController {
 
         saveDraft(dialogId, threadId, draftMessage, replyToMessage, false);
 
-        if (threadId == 0 || ChatObject.isForum(chat) || ChatObject.isMonoForum(chat)) {
+        if (threadId == 0 || ChatObject.isForum(currentAccount, dialogId)) {
             if (!DialogObject.isEncryptedDialog(dialogId)) {
                 TLRPC.TL_messages_saveDraft req = new TLRPC.TL_messages_saveDraft();
                 req.peer = getMessagesController().getInputPeer(dialogId);
@@ -7662,9 +7601,13 @@ public class MediaDataController extends BaseController {
                 req.message = draftMessage.message;
                 req.no_webpage = draftMessage.no_webpage;
                 req.reply_to = draftMessage.reply_to;
-                req.suggested_post = draftMessage.suggested_post;
-                req.entities = draftMessage.entities;
-
+                if (req.reply_to != null) {
+                    req.flags |= 16;
+                }
+                if ((draftMessage.flags & 8) != 0) {
+                    req.entities = draftMessage.entities;
+                    req.flags |= 8;
+                }
                 if ((draftMessage.flags & 128) != 0) {
                     req.effect = draftMessage.effect;
                     req.flags |= 128;
@@ -7676,23 +7619,6 @@ public class MediaDataController extends BaseController {
             getMessagesController().sortDialogs(null);
             getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
         }
-    }
-
-    private static boolean suggestedPostEquals(TLRPC.SuggestedPost a, TLRPC.SuggestedPost b) {
-        if (a == b) {
-            return true;
-        }
-        if ((a == null) != (b == null)) {
-            return false;
-        }
-        if (AmountUtils.Amount.equals(a.price, b.price) || a.schedule_date != b.schedule_date) {
-            return false;
-        }
-        if (a.accepted != b.accepted || a.rejected != b.rejected) {
-            return false;
-        }
-
-        return true;
     }
 
     private static boolean replyToEquals(TLRPC.InputReplyTo a, TLRPC.InputReplyTo b) {
@@ -8004,7 +7930,7 @@ public class MediaDataController extends BaseController {
                 draftMessage.reply_to.reply_to_msg_id = 0;
             }
             draftMessage.flags &= ~1;
-            saveDraft(dialogId, threadId, draftMessage.message, draftMessage.entities, null, null, null, 0, draftMessage.no_webpage, true);
+            saveDraft(dialogId, threadId, draftMessage.message, draftMessage.entities, null, null, 0, draftMessage.no_webpage, true);
         }
     }
 
@@ -8415,7 +8341,6 @@ public class MediaDataController extends BaseController {
         checkMenuBots(true);
         checkPremiumPromo();
         checkPremiumGiftStickers();
-        checkTonGiftStickers();
         checkGenericAnimations();
         getMessagesController().getAvailableEffects();
     }
@@ -9664,15 +9589,6 @@ public class MediaDataController extends BaseController {
             prefs.edit().putString(Objects.hash(dialog_id, topic_id) + "", draft.toString()).apply();
         }
     }
-    public void setDraftVoiceRegion(long dialog_id, long topic_id, float left, float right) {
-        DraftVoice draft = getDraftVoice(dialog_id, topic_id);
-        if (draft != null && (Math.abs(draft.left - left) >= 0.001f || Math.abs(draft.right - right) >= 0.001f)) {
-            draft.left = left;
-            draft.right = right;
-            SharedPreferences prefs = ApplicationLoader.applicationContext.getSharedPreferences("2voicedrafts_" + currentAccount, Context.MODE_PRIVATE);
-            prefs.edit().putString(Objects.hash(dialog_id, topic_id) + "", draft.toString()).apply();
-        }
-    }
     public void pushDraftVoiceMessage(long dialog_id, long topic_id, DraftVoice draft) {
         SharedPreferences prefs = ApplicationLoader.applicationContext.getSharedPreferences("2voicedrafts_" + currentAccount, Context.MODE_PRIVATE);
         final long hash = Objects.hash(dialog_id, topic_id);
@@ -9698,22 +9614,19 @@ public class MediaDataController extends BaseController {
         public long id;
         public short[] recordSamples;
         public boolean once;
-        public float left = 0.0f, right = 1.0f;
 
-        public static DraftVoice of(MediaController mediaController, String path, boolean once, float left, float right) {
+        public static DraftVoice of(MediaController mediaController, String path, boolean once) {
             if (mediaController.recordingAudio == null) {
                 return null;
             }
             DraftVoice draft = new DraftVoice();
             draft.path = path;
             draft.samplesCount = mediaController.samplesCount;
-            draft.writedFrame = mediaController.writtenFrame;
+            draft.writedFrame = mediaController.writedFrame;
             draft.recordTimeCount = mediaController.recordTimeCount;
             draft.id = mediaController.recordingAudio.id;
             draft.recordSamples = mediaController.recordSamples;
             draft.once = once;
-            draft.left = left;
-            draft.right = right;
             return draft;
         }
 
@@ -9724,38 +9637,20 @@ public class MediaDataController extends BaseController {
             for (int i = 0; i < recordSamples.length; ++i) {
                 recordSamplesArray[i] = (char) recordSamples[i];
             }
-            return (
-                "@" +
-                path + "\n" +
-                samplesCount + "\n" +
-                writedFrame + "\n" +
-                recordTimeCount + "\n" +
-                (once ? 1 : 0) + ";" + left + ";" + right + "\n" +
-                new String(recordSamplesArray)
-            );
+            return path + "\n" + samplesCount + "\n" + writedFrame + "\n" + recordTimeCount + "\n" + (once ? 1 : 0) + "\n" + new String(recordSamplesArray);
         }
 
         public static DraftVoice fromString(String string) {
             try {
                 if (string == null) return null;
-                if (!string.startsWith("@")) return null;
-                String[] parts = string.substring(1).split("\n");
+                String[] parts = string.split("\n");
                 if (parts.length < 6) return null;
                 DraftVoice draft = new DraftVoice();
                 draft.path = parts[0];
                 draft.samplesCount = Long.parseLong(parts[1]);
                 draft.writedFrame = Integer.parseInt(parts[2]);
                 draft.recordTimeCount = Long.parseLong(parts[3]);
-                if (parts[4].contains(";")) {
-                    String[] oparts = parts[4].split(";");
-                    draft.once = Integer.parseInt(oparts[0]) != 0;
-                    draft.left = Float.parseFloat(oparts[1]);
-                    draft.right = Float.parseFloat(oparts[2]);
-                } else {
-                    draft.once = Integer.parseInt(parts[4]) != 0;
-                    draft.left = 0.0f;
-                    draft.right = 1.0f;
-                }
+                draft.once = Integer.parseInt(parts[4]) != 0;
                 String[] recordSamplesParts = new String[parts.length - 5];
                 for (int i = 0; i < recordSamplesParts.length; ++i) {
                     recordSamplesParts[i] = parts[5 + i];

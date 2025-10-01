@@ -13,11 +13,13 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -30,6 +32,10 @@ import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -40,12 +46,18 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.C;
+import org.telegram.elari.ui.activity.DeviceNotBoundActivity;
+import org.telegram.elari.ui.activity.QRLoginActivity;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
@@ -57,16 +69,18 @@ import org.telegram.messenger.Intro;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.Vector;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.DrawerProfileCell;
+import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BottomPagesView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieDrawable;
@@ -94,6 +108,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     private ViewPager viewPager;
     private BottomPagesView bottomPages;
     private TextView switchLanguageTextView;
+    private TextView userAgreementTextView;
     private TextView startMessagingButton;
     private FrameLayout frameLayout2;
     private FrameLayout frameContainerView;
@@ -123,20 +138,20 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
         MessagesController.getGlobalMainSettings().edit().putLong("intro_crashed_time", System.currentTimeMillis()).apply();
 
         titles = new String[]{
-                LocaleController.getString(R.string.Page1Title),
-                LocaleController.getString(R.string.Page2Title),
-                LocaleController.getString(R.string.Page3Title),
-                LocaleController.getString(R.string.Page5Title),
-                LocaleController.getString(R.string.Page4Title),
-                LocaleController.getString(R.string.Page6Title)
+                "KidGram",
+                LocaleController.getString("Page2Title", R.string.Page2Title),
+                LocaleController.getString("Page3Title", R.string.Page3Title),
+                LocaleController.getString("Page5Title", R.string.Page5Title),
+                LocaleController.getString("Page4Title", R.string.Page4Title),
+                LocaleController.getString("Page6Title", R.string.Page6Title)
         };
         messages = new String[]{
-                LocaleController.getString(R.string.Page1Message),
-                LocaleController.getString(R.string.Page2Message),
-                LocaleController.getString(R.string.Page3Message),
-                LocaleController.getString(R.string.Page5Message),
-                LocaleController.getString(R.string.Page4Message),
-                LocaleController.getString(R.string.Page6Message)
+                ApplicationLoader.applicationContext.getString(R.string.Page1Message),
+                ApplicationLoader.applicationContext.getResources().getString(R.string.Page2Message),
+                ApplicationLoader.applicationContext.getResources().getString(R.string.Page3Message),
+                ApplicationLoader.applicationContext.getResources().getString(R.string.Page5Message),
+                ApplicationLoader.applicationContext.getResources().getString(R.string.Page4Message),
+                ApplicationLoader.applicationContext.getResources().getString(R.string.Page6Message)
         };
         return true;
     }
@@ -175,6 +190,11 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 y -= AndroidUtilities.dp(30);
                 x = (getMeasuredWidth() - switchLanguageTextView.getMeasuredWidth()) / 2;
                 switchLanguageTextView.layout(x, y - switchLanguageTextView.getMeasuredHeight(), x + switchLanguageTextView.getMeasuredWidth(), y);
+
+
+                y -= AndroidUtilities.dp(120);
+                x = (getMeasuredWidth() - userAgreementTextView.getMeasuredWidth()) / 2;
+                userAgreementTextView.layout(x, y - userAgreementTextView.getMeasuredHeight(), x + userAgreementTextView.getMeasuredWidth(), y);
 
                 MarginLayoutParams marginLayoutParams = (MarginLayoutParams) themeFrameLayout.getLayoutParams();
                 int newTopMargin = AndroidUtilities.dp(themeMargin) + (AndroidUtilities.isTablet() ? 0 : AndroidUtilities.statusBarHeight);
@@ -349,17 +369,88 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
         startMessagingButton.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         frameContainerView.addView(startMessagingButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 16, 0, 16, 76));
         startMessagingButton.setOnClickListener(view -> {
-            if (startPressed) {
-                return;
-            }
+            if (startPressed) {return;}
             startPressed = true;
-
             presentFragment(new LoginActivity().setIntroView(frameContainerView, startMessagingButton), true);
             destroyed = true;
+
+//            if (startPressed) {return;}
+//            startPressed = true;
+//            Intent conversationIntent = new Intent(getContext(), QRLoginActivity.class);
+//            getContext().startActivity(conversationIntent);
+//            destroyed = true;
+
+//            TLRPC.TL_auth_exportLoginToken exportLoginTokenRequest = null;
+//            if (exportLoginTokenRequest == null) {
+//                exportLoginTokenRequest = new TLRPC.TL_auth_exportLoginToken();
+//                exportLoginTokenRequest.api_id = C.apiId;
+//                exportLoginTokenRequest.api_hash = C.apiHash;
+//                exportLoginTokenRequest.except_ids = new ArrayList<>();
+////                for (int a : org.telegram.messenger.SharedConfig.activeAccounts) {
+////                    UserConfig userConfig = UserConfig.getInstance(a);
+////                    if (!userConfig.isClientActivated()) {
+////                        continue;
+////                    }
+////                    exportLoginTokenRequest.except_ids.add(userConfig.clientUserId);
+////                }
+//            }
+//
+//            getConnectionsManager().sendRequest(exportLoginTokenRequest, (response, error) -> {
+//                Log.e("Arttest", "2222 ");
+//                if (error != null) {
+//                    Log.e("Arttest", "error " + error);
+//                    return;
+//                }
+//                Log.e("Arttest", "response " + response.getClass());
+//                if (response instanceof TLRPC.TL_auth_loginToken) {
+//                    TLRPC.TL_auth_loginToken token = (TLRPC.TL_auth_loginToken) response;
+//                    Log.e("Arttest", "token " + token);
+//                    byte[] tokenBytes = token.token;
+//                    String base64Token = Base64.encodeToString(tokenBytes, Base64.NO_WRAP);
+//                    String loginUrl = "tg://login?token=" + base64Token;
+//                    Log.e("Arttest", "loginUrl " + loginUrl);
+////                Bitmap qrBitmap = generateQrCode(loginUrl);
+////                if (qrBitmap != null) {
+////                    runOnUiThread(() -> qrImageView.setImageBitmap(qrBitmap));
+////                }
+//                }
+//            });
+
         });
 
         bottomPages = new BottomPagesView(context, viewPager, 6);
         frameContainerView.addView(bottomPages, LayoutHelper.createFrame(66, 5, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, ICON_HEIGHT_DP + 200, 0, 0));
+
+        userAgreementTextView = new TextView(context);
+        userAgreementTextView.setGravity(Gravity.CENTER);
+        userAgreementTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+        frameContainerView.addView(userAgreementTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 260));
+        String htmlText = ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_1);
+        htmlText += " <a href=\"";
+        htmlText += ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_2);
+        htmlText += "\">";
+        htmlText += ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_3);
+        htmlText += "</a> ";
+        htmlText += ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_4);
+        htmlText += " <a href=\"";
+        htmlText += ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_5);
+        htmlText += "\">";
+        htmlText += ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text_6);
+        htmlText += "</a>";
+        Log.e("ArtTest", "" + htmlText);
+                Spanned spannedText = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            spannedText = Html.fromHtml(htmlText, Html.FROM_HTML_MODE_COMPACT);
+            //spannedText = (Html.fromHtml( "<b>" + "Продолжая использовать приложение, вы принимаете условия <a href=\"https://elari.it/terms_of_use\">Пользовательского соглашения</a> и " + "</b>", Html.FROM_HTML_MODE_COMPACT));
+            userAgreementTextView.setText(spannedText);
+        }else{
+            userAgreementTextView.setText(ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text));
+        }
+        userAgreementTextView.setLinksClickable(true);
+        userAgreementTextView.setAutoLinkMask(0);
+        userAgreementTextView.setLinkTextColor(ApplicationLoader.applicationContext.getResources().getColor(R.color.text_link_blue));
+        userAgreementTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
 
         switchLanguageTextView = new TextView(context);
         switchLanguageTextView.setGravity(Gravity.CENTER);
@@ -506,6 +597,8 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                     AndroidUtilities.runOnUIThread(() -> {
                         if (!destroyed) {
                             switchLanguageTextView.setText(string.value);
+                            //userAgreementTextView.setText(ApplicationLoader.applicationContext.getResources().getString(R.string.user_agreement_text));
+
                             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
                             preferences.edit().putString("language_showed2", finalSystemLang.toLowerCase()).apply();
                         }
@@ -769,10 +862,10 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             loadTexture(R.drawable.intro_powerful_star, 18);
             loadTexture(R.drawable.intro_private_door, 19);
             loadTexture(R.drawable.intro_private_screw, 20);
-            loadTexture(R.drawable.intro_tg_plane, 21);
+            loadTexture(R.drawable.kidgram_logo_just_plain, 21);
             loadTexture(v -> {
                 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paint.setColor(0xFF2CA5E0); // It's logo color, it should not be colored by the theme
+                paint.setColor(0xFF8BA7D7); // It's logo color, it should not be colored by the theme
                 int size = AndroidUtilities.dp(ICON_HEIGHT_DP);
                 Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                 Canvas c = new Canvas(bm);
@@ -945,6 +1038,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     private void updateColors(boolean fromTheme) {
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
         switchLanguageTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4));
+        userAgreementTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText3));
         startMessagingButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         startMessagingButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_changephoneinfo_image2), Theme.getColor(Theme.key_chats_actionPressedBackground)));
         darkThemeDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_changephoneinfo_image2), PorterDuff.Mode.SRC_IN));

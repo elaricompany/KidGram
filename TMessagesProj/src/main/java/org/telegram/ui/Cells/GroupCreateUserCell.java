@@ -21,15 +21,21 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
@@ -37,7 +43,7 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -58,6 +64,8 @@ import org.telegram.ui.Components.Premium.PremiumGradient;
 public class GroupCreateUserCell extends FrameLayout {
 
     private BackupImageView avatarImageView;
+    private BackupImageView avatarImageViewBlur;
+    public BackupImageView lockImg;
     private SimpleTextView nameTextView;
     private SimpleTextView statusTextView;
     private CheckBox2 checkBox;
@@ -91,6 +99,7 @@ public class GroupCreateUserCell extends FrameLayout {
 
     private final AnimatedFloat premiumBlockedT = new AnimatedFloat(this, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
     private boolean premiumBlocked;
+    private boolean isBlockedAccount = false;
     private final AnimatedFloat starsBlockedT = new AnimatedFloat(this, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
     private long starsPriceBlocked;
     private TL_account.RequirementToContact blockedOverridden;
@@ -98,6 +107,14 @@ public class GroupCreateUserCell extends FrameLayout {
 
     public boolean isBlocked() {
         return premiumBlocked;
+    }
+    public boolean isElariBlocked() {
+        return isBlockedAccount;
+    }
+
+    public void setBlock(boolean block) {
+        isBlockedAccount = block;
+        update(0);
     }
 
     public GroupCreateUserCell showPremiumBlocked() {
@@ -145,6 +162,22 @@ public class GroupCreateUserCell extends FrameLayout {
         avatarImageView = new BackupImageView(context);
         avatarImageView.setRoundRadius(AndroidUtilities.dp(24));
         addView(avatarImageView, LayoutHelper.createFrame(46, 46, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : (13 + padding), 6, LocaleController.isRTL ? (13 + padding) : 0, 0));
+
+        avatarImageViewBlur = new BackupImageView(context);
+        avatarImageViewBlur.setRoundRadius(AndroidUtilities.dp(24));
+        addView(avatarImageViewBlur, LayoutHelper.createFrame(46, 46, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : (13 + padding), 6, LocaleController.isRTL ? (13 + padding) : 0, 0));
+        avatarImageViewBlur.setImageDrawable(getResources().getDrawable(R.drawable.blur3));
+
+        lockImg = new BackupImageView(context) {
+            @Override protected void onDraw(Canvas canvas) {super.onDraw(canvas);}
+            @Override public boolean onTouchEvent(MotionEvent event) { return super.onTouchEvent(event); }
+        };
+        //lockImg.setRoundRadius(dp(24));
+        addView(lockImg, LayoutHelper.createFrame(24, 24, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 0 : 7 + padding, 0, LocaleController.isRTL ? 7 + padding : 0, 0));
+        LayoutParams layoutParams = (LayoutParams) lockImg.getLayoutParams();
+        layoutParams.rightMargin = dp(LocaleController.isRTL ? 0 : 7 + 8);
+        layoutParams.leftMargin  = dp(LocaleController.isRTL ? 7 + 8 : 0);
+        lockImg.setLayoutParams(layoutParams);
 
         nameTextView = new SimpleTextView(context) {
             @Override
@@ -540,6 +573,31 @@ public class GroupCreateUserCell extends FrameLayout {
             }
         }
 
+        avatarImageViewBlur.setVisibility(VISIBLE);
+        lockImg.setVisibility(GONE);
+        if(isBlockedAccount){
+            lockImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock));
+            lockImg.setVisibility(VISIBLE);
+            if(ElariUtils.isNeedAvatarBlur()) {
+                boolean isAvatarFind = false;
+                if (currentChat != null) {
+                    if ((currentChat.photo != null) && (currentChat.photo.strippedBitmap != null)) {
+                        avatarImageViewBlur.setVisibility(GONE);
+                        BitmapDrawable strippedBitmap = currentChat.photo.strippedBitmap;
+                        avatarImageView.setImageDrawable(strippedBitmap);
+                        isAvatarFind = true;
+                    }else{
+                        avatarImageViewBlur.setVisibility(VISIBLE);
+                    }
+                }
+//                if (!isAvatarFind) {
+//                    avatarImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_2));
+//                }
+            }
+        }else{
+            avatarImageViewBlur.setVisibility(GONE);
+            lockImg.setVisibility(GONE);
+        }
         avatarImageView.setRoundRadius(currentChat != null && currentChat.forum ? AndroidUtilities.dp(14) : AndroidUtilities.dp(24));
         if (currentStatus != null) {
             statusTextView.setText(currentStatus, true);

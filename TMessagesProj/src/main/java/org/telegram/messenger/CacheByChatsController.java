@@ -3,6 +3,7 @@ package org.telegram.messenger;
 import android.text.TextUtils;
 import android.util.LongSparseArray;
 
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 
 import java.io.File;

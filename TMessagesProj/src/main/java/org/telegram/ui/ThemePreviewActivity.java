@@ -98,7 +98,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
@@ -5471,7 +5471,7 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
                     }
                     messageCell.isChat = showSecretMessages || dialogId < 0;
                     messageCell.setFullyDraw(true);
-                    messageCell.setMessageObject(message, null, pinnedBotton, pinnedTop, false);
+                    messageCell.setMessageObject(message, null, pinnedBotton, pinnedTop);
                 } else if (view instanceof ChatActionCell) {
                     ChatActionCell actionCell = (ChatActionCell) view;
                     actionCell.setMessageObject(message);

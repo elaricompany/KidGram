@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.browser.Browser;
@@ -54,7 +54,7 @@ public class PremiumPreviewGiftLinkBottomSheet extends PremiumPreviewBottomSheet
     }
 
     public PremiumPreviewGiftLinkBottomSheet(BaseFragment fragment, int currentAccount, TLRPC.User user, GiftPremiumBottomSheet.GiftTier gift, String slug, boolean isUsed, Theme.ResourcesProvider resourcesProvider) {
-        super(fragment, currentAccount, user, gift, null, resourcesProvider);
+        super(fragment, currentAccount, user, gift, resourcesProvider);
         this.slug = slug;
         this.isUsed = isUsed;
         init();
@@ -144,7 +144,7 @@ public class PremiumPreviewGiftLinkBottomSheet extends PremiumPreviewBottomSheet
                     actionBtn.updateLoading(false);
                     dismiss();
                     AndroidUtilities.runOnUIThread(() -> {
-                        PremiumPreviewBottomSheet previewBottomSheet = new PremiumPreviewBottomSheet(getBaseFragment(), UserConfig.selectedAccount, null, null, null, resourcesProvider)
+                        PremiumPreviewBottomSheet previewBottomSheet = new PremiumPreviewBottomSheet(getBaseFragment(), UserConfig.selectedAccount, null, null, resourcesProvider)
                                 .setAnimateConfetti(true)
                                 .setAnimateConfettiWithStars(true)
                                 .setOutboundGift(true);

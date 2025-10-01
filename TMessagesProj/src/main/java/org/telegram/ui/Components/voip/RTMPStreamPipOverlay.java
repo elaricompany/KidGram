@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
@@ -31,7 +30,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 import androidx.core.view.GestureDetectorCompat;
@@ -48,11 +46,9 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
-import org.telegram.messenger.pip.source.IPipSourceDelegate;
-import org.telegram.messenger.pip.utils.PipPermissions;
+import org.elarikg.messenger.R;
+import org.telegram.messenger.pip.PictureInPictureContentViewProvider;
 import org.telegram.messenger.pip.PipSource;
-import org.telegram.messenger.pip.utils.PipUtils;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.TLRPC;
@@ -61,6 +57,7 @@ import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.messenger.pip.PipNativeApiController;
 import org.telegram.ui.Components.SimpleFloatPropertyCompat;
 import org.telegram.ui.LaunchActivity;
 import org.webrtc.RendererCommon;
@@ -68,15 +65,15 @@ import org.webrtc.RendererCommon;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCenterDelegate, IPipSourceDelegate {
+public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCenterDelegate, PictureInPictureContentViewProvider {
     private final static float ROUNDED_CORNERS_DP = 10;
     private final static float SIDE_PADDING_DP = 16;
     private final static FloatPropertyCompat<RTMPStreamPipOverlay> PIP_X_PROPERTY = new SimpleFloatPropertyCompat<>("pipX", obj -> obj.pipX, (obj, value) -> {
         obj.windowLayoutParams.x = (int) (obj.pipX = value);
-        AndroidUtilities.updateViewLayout(obj.windowManager, obj.contentView, obj.windowLayoutParams);
+        obj.windowManager.updateViewLayout(obj.contentView, obj.windowLayoutParams);
     }), PIP_Y_PROPERTY = new SimpleFloatPropertyCompat<>("pipY", obj -> obj.pipY, (obj, value) -> {
         obj.windowLayoutParams.y = (int) (obj.pipY = value);
-        AndroidUtilities.updateViewLayout(obj.windowManager, obj.contentView, obj.windowLayoutParams);
+        obj.windowManager.updateViewLayout(obj.contentView, obj.windowLayoutParams);
     });
 
     @SuppressLint("StaticFieldLeak")
@@ -297,7 +294,7 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
                 isScrollDisallowed = true;
                 windowLayoutParams.width = (int) (getSuggestedWidth() * maxScaleFactor);
                 windowLayoutParams.height = (int) (getSuggestedHeight() * maxScaleFactor);
-                AndroidUtilities.updateViewLayout(windowManager, contentView, windowLayoutParams);
+                windowManager.updateViewLayout(contentView, windowLayoutParams);
 
                 return true;
             }
@@ -335,7 +332,7 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
             private void updateLayout() {
                 pipWidth = windowLayoutParams.width = (int) (getSuggestedWidth() * scaleFactor);
                 pipHeight = windowLayoutParams.height = (int) (getSuggestedHeight() * scaleFactor);
-                AndroidUtilities.updateViewLayout(windowManager, contentView, windowLayoutParams);
+                windowManager.updateViewLayout(contentView, windowLayoutParams);
             }
         });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -418,7 +415,7 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
                 if (isScrolling) {
                     windowLayoutParams.x = (int) (pipX = startPipX + e2.getRawX() - e1.getRawX());
                     windowLayoutParams.y = (int) (pipY = startPipY + e2.getRawY() - e1.getRawY());
-                    AndroidUtilities.updateViewLayout(windowManager, contentView, windowLayoutParams);
+                    windowManager.updateViewLayout(contentView, windowLayoutParams);
                 }
                 return true;
             }
@@ -512,15 +509,6 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
                     contentFrameLayout.measure(MeasureSpec.makeMeasureSpec(pipWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(pipHeight, MeasureSpec.EXACTLY));
                 }
             }
-
-            @Override
-            public void draw(@NonNull Canvas canvas) {
-                if (windowViewSkipRender) {
-                    return;
-                }
-
-                super.draw(canvas);
-            }
         };
         contentView.addView(contentFrameLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -546,10 +534,6 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
             @Override
             public void onFirstFrameRendered() {
                 firstFrameRendered = true;
-                if (firstFrameCallback != null) {
-                    firstFrameCallback.run();
-                    firstFrameCallback = null;
-                }
                 AndroidUtilities.runOnUIThread(()-> bindTextureView());
             }
 
@@ -633,7 +617,7 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
         contentFrameLayout.addView(controlsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        windowLayoutParams = PipUtils.createWindowLayoutParams(context, false);
+        windowLayoutParams = PipNativeApiController.createWindowLayoutParams(context, false);
         windowLayoutParams.width = pipWidth;
         windowLayoutParams.height = pipHeight;
         windowLayoutParams.x = (int) (pipX = AndroidUtilities.displaySize.x - pipWidth - AndroidUtilities.dp(SIDE_PADDING_DP));
@@ -655,14 +639,6 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
                 ObjectAnimator.ofFloat(contentView, View.SCALE_X, 1f),
                 ObjectAnimator.ofFloat(contentView, View.SCALE_Y, 1f)
         );
-        set.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
-                if (pipSource != null) {
-                    pipSource.invalidatePosition();
-                }
-            }
-        });
         set.start();
 
         bindTextureView();
@@ -673,13 +649,11 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
             pipSource = null;
         }
         if (activity != null) {
-            if (PipUtils.checkPermissions(activity) == PipPermissions.PIP_GRANTED_PIP) {
+            if (PipNativeApiController.checkPermissions(activity) == PipNativeApiController.PIP_GRANTED_PIP) {
                 pipSource = new PipSource.Builder(activity, this)
                     .setTagPrefix("pip-rtmp-video")
                     .setPriority(1)
-                    .setCornerRadius(AndroidUtilities.dp(ROUNDED_CORNERS_DP))
                     .setContentView(contentView)
-                    .setPlaceholderView(textureView.getPlaceholderView())
                     .build();
             }
         }
@@ -696,8 +670,6 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
                 if (boundParticipant != null) {
                     VoIPService.getSharedInstance().removeRemoteSink(boundParticipant, boundPresentation);
                 }
-
-                final VoIPTextureView textureView = pipTextureView != null ? pipTextureView : this.textureView;
 
                 boundPresentation = participant.presentation != null;
                 if (participant.self) { // For debug reasons
@@ -747,7 +719,7 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
         if (pipWidth != getSuggestedWidth() * scaleFactor || pipHeight != getSuggestedHeight() * scaleFactor) {
             windowLayoutParams.width = pipWidth = (int) (getSuggestedWidth() * scaleFactor);
             windowLayoutParams.height = pipHeight = (int) (getSuggestedHeight() * scaleFactor);
-            AndroidUtilities.updateViewLayout(windowManager, contentView, windowLayoutParams);
+            windowManager.updateViewLayout(contentView, windowLayoutParams);
 
             pipXSpring.setStartValue(pipX)
                     .getSpring()
@@ -772,87 +744,33 @@ public class RTMPStreamPipOverlay implements NotificationCenter.NotificationCent
 
 
 
-    private Runnable firstFrameCallback;
-    private VoIPTextureView pipTextureView;
-    private boolean windowViewSkipRender;
+    /* * */
 
     @Override
-    public Bitmap pipCreatePrimaryWindowViewBitmap() {
-        if (textureView == null || !textureView.renderer.isAvailable()) {
-            return null;
-        }
+    public View detachContentFromWindow() {
+        controlsView.setVisibility(View.GONE);
+        contentView.setVisibility(View.GONE);
+        contentView.removeView(contentFrameLayout);
 
-        return textureView.renderer.getBitmap();
+        return contentFrameLayout;
     }
 
     @Override
-    public View pipCreatePictureInPictureView() {
-        pipTextureView = new VoIPTextureView(textureView.getContext(), false, false, false, false);
-        pipTextureView.renderer.setOpaque(false);
-        pipTextureView.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-        pipTextureView.scaleType = VoIPTextureView.SCALE_TYPE_FILL;
-        pipTextureView.renderer.setRotateTextureWithScreen(true);
-        pipTextureView.renderer.init(VideoCapturerDevice.getEglBase().getEglBaseContext(), new RendererCommon.RendererEvents() {
-            @Override
-            public void onFirstFrameRendered() {
-                if (firstFrameCallback != null) {
-                    firstFrameCallback.run();
-                    firstFrameCallback = null;
-                }
-            }
-
-            @Override
-            public void onFrameResolutionChanged(int videoWidth, int videoHeight, int rotation) {
-
-            }
-        });
-        if (pipTextureView.backgroundView != null) {
-            pipTextureView.backgroundView.setVisibility(View.GONE);
-        }
-
-        return pipTextureView;
-    }
-
-    @Override
-    public void pipHidePrimaryWindowView(Runnable firstFrameCallback) {
-        this.firstFrameCallback = firstFrameCallback;
-        if (textureView != null) {
-            textureView.renderer.clearFirstFrame();
-        }
-
+    public void onAttachContentToPip() {
         bindTextureView(true);
-
-        windowViewSkipRender = true;
-        windowManager.removeView(contentView);
-        contentView.invalidate();
     }
 
     @Override
-    public Bitmap pipCreatePictureInPictureViewBitmap() {
-        if (pipTextureView == null || !pipTextureView.renderer.isAvailable()) {
-            return null;
-        }
+    public void prepareDetachContentFromPip() {
 
-        return pipTextureView.renderer.getBitmap();
     }
 
     @Override
-    public void pipShowPrimaryWindowView(Runnable firstFrameCallback) {
-        this.firstFrameCallback = firstFrameCallback;
+    public void attachContentToWindow() {
+        contentView.addView(contentFrameLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        controlsView.setVisibility(View.VISIBLE);
+        contentView.setVisibility(View.VISIBLE);
 
-        if (pipSource != null && pipSource.params.isValid()) {
-            windowLayoutParams.width = pipWidth = pipSource.params.getWidth();
-            windowLayoutParams.height = pipHeight = pipSource.params.getHeight();
-        }
-
-        windowViewSkipRender = false;
-        windowManager.addView(contentView, windowLayoutParams);
-        contentView.invalidate();
-
-        if (pipTextureView != null) {
-            pipTextureView.renderer.release();
-            pipTextureView = null;
-        }
         bindTextureView(true);
     }
 }

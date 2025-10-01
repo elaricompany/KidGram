@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 
 public class StarAppsSheet extends BottomSheetWithRecyclerListView {

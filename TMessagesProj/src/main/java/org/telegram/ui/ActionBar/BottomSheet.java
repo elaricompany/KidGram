@@ -64,7 +64,7 @@ import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.camera.CameraView;
@@ -1855,7 +1855,6 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
             });
         } else {
             if (!allowCustomAnimation || !onCustomCloseAnimation()) {
-                AndroidUtilities.hideKeyboard(container);
                 currentSheetAnimationType = 2;
                 if (navigationBarAnimation != null) {
                     navigationBarAnimation.cancel();

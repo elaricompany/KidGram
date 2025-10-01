@@ -108,7 +108,7 @@ public class ChatBackgroundDrawable extends Drawable {
                     wallPaper.settings.fourth_background_color
             );
             EmojiThemes.loadWallpaperImage(UserConfig.selectedAccount, wallPaper.id, wallPaper, result -> {
-                motionBackgroundDrawable.setPatternBitmap(wallPaper.settings.intensity, result.bitmap);
+                motionBackgroundDrawable.setPatternBitmap(wallPaper.settings.intensity, result.second);
                 if (parent != null) {
                     parent.invalidate();
                 }
@@ -250,9 +250,6 @@ public class ChatBackgroundDrawable extends Drawable {
             attached = false;
             imageReceiver.onDetachedFromWindow();
         }
-        if (motionBackgroundDrawable != null) {
-            motionBackgroundDrawable.onAttachedToWindow();
-        }
     }
 
     public void onDetachedFromWindow(View view) {
@@ -265,9 +262,6 @@ public class ChatBackgroundDrawable extends Drawable {
         } else if (!isAttached() && attached) {
             attached = false;
             imageReceiver.onDetachedFromWindow();
-        }
-        if (motionBackgroundDrawable != null) {
-            motionBackgroundDrawable.onDetachedFromWindow();
         }
     }
 

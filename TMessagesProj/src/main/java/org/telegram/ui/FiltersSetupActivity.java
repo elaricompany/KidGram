@@ -36,7 +36,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
@@ -579,10 +579,10 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         }
         items.add(ItemInner.asShadow(null));
         folderTagsPosition = items.size();
-        items.add(ItemInner.asCheck(LocaleController.getString(R.string.FolderShowTags)));
-        items.add(ItemInner.asShadow(!getUserConfig().isPremium() ? AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.FolderShowTagsInfoPremium), Theme.key_windowBackgroundWhiteBlueHeader, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, () -> {
+        //items.add(ItemInner.asCheck(LocaleController.getString(R.string.FolderShowTags)));
+        /*items.add(ItemInner.asShadow(!getUserConfig().isPremium() ? AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.FolderShowTagsInfoPremium), Theme.key_windowBackgroundWhiteBlueHeader, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, () -> {
             presentFragment(new PremiumPreviewFragment("settings"));
-        }) : LocaleController.getString(R.string.FolderShowTagsInfo)));
+        }) : LocaleController.getString(R.string.FolderShowTagsInfo)));*/
 
         if (adapter != null) {
             if (animated) {

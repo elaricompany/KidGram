@@ -26,6 +26,7 @@ import android.util.SparseIntArray;
 
 import androidx.collection.LongSparseArray;
 
+import org.elarikg.messenger.R;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLitePreparedStatement;
 import org.telegram.tgnet.NativeByteBuffer;

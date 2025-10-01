@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import androidx.annotation.IntDef;
@@ -19,6 +20,7 @@ import androidx.collection.LongSparseArray;
 
 import com.google.android.exoplayer2.util.Log;
 
+import org.elarikg.messenger.R;
 import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.TLRPC;
@@ -34,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChatObject {
 
@@ -70,8 +73,6 @@ public class ChatObject {
     public static final int ACTION_SEND_PLAIN = 22;
     public static final int ACTION_SEND_GIFS = 23;
 
-    public static final int ACTION_MANAGE_DIRECT = 24;
-
     public final static int VIDEO_FRAME_NO_FRAME = 0;
     public final static int VIDEO_FRAME_REQUESTING = 1;
     public final static int VIDEO_FRAME_HAS_FRAME = 2;
@@ -97,14 +98,6 @@ public class ChatObject {
         TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
         if (chat != null) {
             return chat.forum;
-        }
-        return false;
-    }
-
-    public static boolean isMonoForum(int currentAccount, long dialogId) {
-        TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
-        if (chat != null) {
-            return chat.monoforum;
         }
         return false;
     }
@@ -1752,39 +1745,6 @@ public class ChatObject {
         return false;
     }
 
-    public static boolean canManageMonoForum(int currentAccount, long dialogId) {
-        return canUserDoChannelDirectAdminAction(currentAccount, dialogId, ACTION_MANAGE_DIRECT);
-    }
-
-    public static boolean canManageMonoForum(int currentAccount, TLRPC.Chat chat) {
-        return canUserDoChannelDirectAdminAction(currentAccount, chat, ACTION_MANAGE_DIRECT);
-    }
-
-    public static boolean canUserDoChannelDirectAdminAction(int currentAccount, long dialogId, int action) {
-        return canUserDoAdminAction(getChannelDirectChatInternal(currentAccount, dialogId), action);
-    }
-
-    public static boolean canUserDoChannelDirectAdminAction(int currentAccount, TLRPC.Chat chat, int action) {
-        return canUserDoAdminAction(getChannelDirectChatInternal(currentAccount, chat), action);
-    }
-
-    private static TLRPC.Chat getChannelDirectChatInternal(int currentAccount, long dialogId) {
-        return getChannelDirectChatInternal(currentAccount,
-            MessagesController.getInstance(currentAccount).getChat(-dialogId));
-    }
-
-    private static TLRPC.Chat getChannelDirectChatInternal(int currentAccount, TLRPC.Chat chat) {
-        if (chat == null || chat.linked_monoforum_id == 0) {
-            return null;
-        }
-
-        if (chat.monoforum) {
-            return MessagesController.getInstance(currentAccount).getChat(chat.linked_monoforum_id);
-        }
-
-        return chat;
-    }
-
     public static boolean canUserDoAdminAction(TLRPC.Chat chat, int action) {
         if (chat == null) {
             return false;
@@ -1795,9 +1755,6 @@ public class ChatObject {
         if (chat.admin_rights != null) {
             boolean value;
             switch (action) {
-                case ACTION_MANAGE_DIRECT:
-                    value = chat.admin_rights.manage_direct_messages;
-                    break;
                 case ACTION_PIN:
                     value = chat.admin_rights.pin_messages;
                     break;
@@ -1962,7 +1919,7 @@ public class ChatObject {
     }
 
     public static boolean isBoostSupported(TLRPC.Chat chat) {
-        return (isChannelAndNotMegaGroup(chat) || isMegagroup(chat)) && !isMonoForum(chat);
+        return isChannelAndNotMegaGroup(chat) || isMegagroup(chat);
     }
 
     public static boolean isBoosted(TLRPC.ChatFull chatFull) {
@@ -1971,10 +1928,6 @@ public class ChatObject {
 
     public static boolean isForum(TLRPC.Chat chat) {
         return chat != null && chat.forum;
-    }
-
-    public static boolean isMonoForum(TLRPC.Chat chat) {
-        return chat != null && chat.monoforum;
     }
 
     public static boolean hasStories(TLRPC.Chat chat) {
@@ -2063,9 +2016,6 @@ public class ChatObject {
     }
 
     public static boolean canSendPolls(TLRPC.Chat chat) {
-        if (ChatObject.isMonoForum(chat)) {
-            return false;
-        }
         if (isIgnoredChatRestrictionsForBoosters(chat)) {
             return true;
         }
@@ -2133,7 +2083,7 @@ public class ChatObject {
     }
 
     public static boolean canPinMessages(TLRPC.Chat chat) {
-        return (canUserDoAction(chat, ACTION_PIN) || ChatObject.isChannel(chat) && !chat.megagroup && chat.admin_rights != null && chat.admin_rights.edit_messages);
+        return canUserDoAction(chat, ACTION_PIN) || ChatObject.isChannel(chat) && !chat.megagroup && chat.admin_rights != null && chat.admin_rights.edit_messages;
     }
 
     public static boolean canCreateTopic(TLRPC.Chat chat) {
@@ -2456,9 +2406,5 @@ public class ChatObject {
         } else {
             return null;
         }
-    }
-
-    public static boolean areTabsEnabled(TLRPC.Chat chat) {
-        return SharedConfig.forceForumTabs || chat != null && chat.forum_tabs;
     }
 }

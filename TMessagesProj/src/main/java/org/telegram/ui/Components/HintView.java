@@ -31,7 +31,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -239,6 +239,9 @@ public class HintView extends FrameLayout {
                 top += AndroidUtilities.dp(22);
                 if (!messageObject.isOutOwner() && cell.isDrawNameLayout()) {
                     top += AndroidUtilities.dp(20);
+                }
+                if (!messageObject.shouldDrawWithoutBackground() && cell.isDrawTopic()) {
+                    top += AndroidUtilities.dp(5) + cell.getDrawTopicHeight();
                 }
             }
             if (!isTopArrow && top <= getMeasuredHeight() + AndroidUtilities.dp(10)) {

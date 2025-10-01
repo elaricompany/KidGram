@@ -38,7 +38,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -494,7 +494,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
         if (type == TYPE_MEDIA && dialogId == getUserConfig().getClientUserId() && topicId == 0 && !getMessagesController().getSavedMessagesController().unsupported && getMessagesController().getSavedMessagesController().hasDialogs()) {
             initialTab = SharedMediaLayout.TAB_SAVED_DIALOGS;
         }
-        sharedMediaLayout = new SharedMediaLayout(context, dialogId, sharedMediaPreloader, 0, null, currentChatInfo, currentUserInfo, initialTab, 0, this, new SharedMediaLayout.Delegate() {
+        sharedMediaLayout = new SharedMediaLayout(context, dialogId, sharedMediaPreloader, 0, null, currentChatInfo, currentUserInfo, initialTab, this, new SharedMediaLayout.Delegate() {
             @Override
             public void scrollToSharedMedia() {
 

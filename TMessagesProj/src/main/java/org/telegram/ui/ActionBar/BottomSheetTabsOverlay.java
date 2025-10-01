@@ -43,7 +43,7 @@ import androidx.annotation.RequiresApi;
 import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -123,7 +123,7 @@ public class BottomSheetTabsOverlay extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) + (Build.VERSION.SDK_INT < 35 ? AndroidUtilities.navigationBarHeight : 0), MeasureSpec.EXACTLY));
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) + AndroidUtilities.navigationBarHeight, MeasureSpec.EXACTLY));
     }
 
     public void setTabsView(BottomSheetTabs tabsView) {

@@ -23,7 +23,7 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.core:core:1.10.1'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation files('../TMessagesProj/libs/libgsaverification-client.aar')
 
     implementation "com.microsoft.appcenter:appcenter-distribute:3.3.1"
@@ -36,16 +36,15 @@ dependencies {
 
 android {
     compileSdkVersion 35
-    buildToolsVersion '35.0.0'
+    buildToolsVersion '33.0.0'
 
     defaultConfig.applicationId = APP_PACKAGE
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 
-    lintOptions {
-        disable 'MissingTranslation'
-        disable 'ExtraTranslation'
-        disable 'BlockedPrivateApi'
+
+    dexOptions {
+        jumboMode = true
     }
 
     compileOptions {
@@ -77,9 +76,9 @@ android {
             jniDebuggable false
             signingConfig signingConfigs.debug
             applicationIdSuffix ".beta"
-            minifyEnabled true
+            minifyEnabled false
             multiDexEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel = 'FULL'
         }
         HA_public {
@@ -87,9 +86,9 @@ android {
             jniDebuggable false
             signingConfig signingConfigs.debug
             applicationIdSuffix ".beta"
-            minifyEnabled true
+            minifyEnabled false
             multiDexEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel = 'FULL'
         }
         HA_hardcore {
@@ -97,9 +96,9 @@ android {
             jniDebuggable false
             signingConfig signingConfigs.debug
             applicationIdSuffix ".beta"
-            minifyEnabled true
+            minifyEnabled false
             multiDexEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel = 'FULL'
         }
     }
@@ -119,7 +118,7 @@ android {
     productFlavors {
         bundleAfat {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86_64" ,"x86"
             }
             ext {
                 abiVersionCode = 1
@@ -127,16 +126,16 @@ android {
         }
         bundleAfat_SDK23 {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                abiFilters "armeabi-v7a", "arm64-v8a",  "x86_64" ,"x86"
             }
-            minSdkVersion 23
+            minSdkVersion 24
             ext {
                 abiVersionCode = 2
             }
         }
         afat {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                abiFilters "armeabi-v7a", "arm64-v8a",  "x86_64" ,"x86"
             }
             ext {
                 abiVersionCode = 9
@@ -161,7 +160,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 35
         versionName APP_VERSION_NAME
         ndkVersion "21.4.7075529"
@@ -173,7 +172,7 @@ android {
         externalNativeBuild {
             cmake {
                 version '3.10.2'
-                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-21' // , '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-16', "-j=16"
             }
         }
     }
@@ -181,10 +180,11 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    namespace 'org.telegram.messenger.regular'
-
-    lintOptions {
+    namespace 'org.elarikg.messenger.regular'
+    lint {
         checkReleaseBuilds false
+        disable 'MissingTranslation', 'ExtraTranslation', 'BlockedPrivateApi'
     }
+
 }
 

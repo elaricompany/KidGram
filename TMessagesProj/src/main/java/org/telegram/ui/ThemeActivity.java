@@ -41,7 +41,6 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -60,18 +59,16 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.time.SunDate;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeColors;
@@ -93,7 +90,6 @@ import org.telegram.ui.Cells.ThemePreviewMessagesCell;
 import org.telegram.ui.Cells.ThemeTypeCell;
 import org.telegram.ui.Cells.ThemesHorizontalListCell;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.PermissionRequest;
@@ -103,12 +99,7 @@ import org.telegram.ui.Components.SeekBarView;
 import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.SimpleThemeDescription;
 import org.telegram.ui.Components.SwipeGestureSettingsView;
-import org.telegram.ui.Components.TextHelper;
 import org.telegram.ui.Components.ThemeEditorView;
-import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
-import org.telegram.ui.bots.BotWebViewAttachedSheet;
-import org.telegram.ui.bots.BotWebViewSheet;
-import org.telegram.ui.bots.WebViewRequestProps;
 import org.telegram.ui.web.SearchEngine;
 import org.telegram.ui.web.WebBrowserSettings;
 
@@ -151,7 +142,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
     private int textSizeRow;
     private int settingsRow;
     private int directShareRow;
-    private int sensitiveContentRow;
+//    private int sensitiveContentRow;
     private int raiseToSpeakRow;
     private int raiseToListenRow;
     private int nextMediaTapRow;
@@ -219,8 +210,8 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
     private int liteModeRow;
     private int liteModeInfoRow;
 
-    private int appIconHeaderRow;
-    private int appIconSelectorRow;
+//    private int appIconHeaderRow;
+//    private int appIconSelectorRow;
     private int appIconShadowRow;
 
     private int rowCount;
@@ -570,7 +561,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         changeUserColor = -1;
         settingsRow = -1;
         directShareRow = -1;
-        sensitiveContentRow = -1;
+        //sensitiveContentRow = -1;
         enableAnimationsRow = -1;
         raiseToSpeakRow = -1;
         raiseToListenRow = -1;
@@ -593,8 +584,8 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         editThemeRow = -1;
         createNewThemeRow = -1;
 
-        appIconHeaderRow = -1;
-        appIconSelectorRow = -1;
+        //appIconHeaderRow = -1;
+        //appIconSelectorRow = -1;
         appIconShadowRow = -1;
         lastShadowRow = -1;
 
@@ -643,7 +634,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             textSizeHeaderRow = rowCount++;
             textSizeRow = rowCount++;
             backgroundRow = rowCount++;
-            changeUserColor = rowCount++;
+            //changeUserColor = rowCount++;
             newThemeInfoRow = rowCount++;
             themeHeaderRow = rowCount++;
 
@@ -658,8 +649,8 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             chatListRow = rowCount++;
             chatListInfoRow = rowCount++;
 
-            appIconHeaderRow = rowCount++;
-            appIconSelectorRow = rowCount++;
+            //appIconHeaderRow = rowCount++;
+            //appIconSelectorRow = rowCount++;
             appIconShadowRow = rowCount++;
 
             swipeGestureHeaderRow = rowCount++;
@@ -687,7 +678,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             directShareRow = rowCount++;
             TL_account.contentSettings contentSettings = getMessagesController().getContentSettings();
             if (contentSettings != null && contentSettings.sensitive_can_change) {
-                sensitiveContentRow = rowCount++;
+                //sensitiveContentRow = rowCount++;
             }
             sendByEnterRow = rowCount++;
             distanceRow = rowCount++;
@@ -827,8 +818,6 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.needShareTheme);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.needSetDayNightTheme);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiPreviewThemesChanged);
-        getNotificationCenter().addObserver(this, NotificationCenter.appConfigUpdated);
-        getNotificationCenter().addObserver(this, NotificationCenter.contentSettingsLoaded);
         getNotificationCenter().addObserver(this, NotificationCenter.themeUploadedToServer);
         getNotificationCenter().addObserver(this, NotificationCenter.themeUploadError);
         if (currentType == THEME_TYPE_BASIC) {
@@ -850,8 +839,6 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.needShareTheme);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.needSetDayNightTheme);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiPreviewThemesChanged);
-        getNotificationCenter().removeObserver(this, NotificationCenter.appConfigUpdated);
-        getNotificationCenter().removeObserver(this, NotificationCenter.contentSettingsLoaded);
         getNotificationCenter().removeObserver(this, NotificationCenter.themeUploadedToServer);
         getNotificationCenter().removeObserver(this, NotificationCenter.themeUploadError);
         Theme.saveAutoNightThemeConfig();
@@ -908,10 +895,6 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             if (themeListRow2 >= 0) {
                 listAdapter.notifyItemChanged(themeListRow2);
             }
-        } else if (id == NotificationCenter.contentSettingsLoaded || id == NotificationCenter.appConfigUpdated) {
-            if (sensitiveContentRow >= 0) {
-                listAdapter.notifyItemChanged(sensitiveContentRow);
-            }
         }
     }
 
@@ -948,11 +931,11 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             if (getMessagesController().getContentSettings() == null) {
                 getMessagesController().getContentSettings(settings -> {
                     if (listView != null && listView.isAttachedToWindow() && listAdapter != null) {
-                        if ((sensitiveContentRow >= 0) == (settings != null && settings.sensitive_can_change)) {
-                            listAdapter.notifyItemChanged(sensitiveContentRow);
-                        } else {
+//                        if ((sensitiveContentRow >= 0) == (settings != null && settings.sensitive_can_change)) {
+//                            listAdapter.notifyItemChanged(sensitiveContentRow);
+//                        } else {
                             updateRows(true);
-                        }
+//                        }
                     }
                 });
             }
@@ -1095,7 +1078,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             } else if (position == backgroundRow) {
                 presentFragment(new WallpapersListActivity(WallpapersListActivity.TYPE_ALL));
             } else if (position == changeUserColor) {
-                presentFragment(new PeerColorActivity(0).setOnApplied(this));
+              // presentFragment(new PeerColorActivity(0).setOnApplied(this));
             } else if (position == sendByEnterRow) {
                 SharedPreferences preferences = MessagesController.getGlobalMainSettings();
                 boolean send = preferences.getBoolean("send_by_enter", false);
@@ -1294,28 +1277,17 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(SharedConfig.directShare);
                 }
-            } else if (position == sensitiveContentRow) {
+            }/* else if (position == sensitiveContentRow) {
                 if (!getMessagesController().showSensitiveContent()) {
-                    Runnable set = () -> {
-                        getMessagesController().setContentSettings(true);
-                        if (view instanceof TextCheckCell) {
-                            ((TextCheckCell) view).setChecked(getMessagesController().showSensitiveContent());
-                        }
-                    };
                     showDialog(
                         new AlertDialog.Builder(context, resourceProvider)
                             .setTitle(getString(R.string.ConfirmSensitiveContentTitle))
                             .setMessage(getString(R.string.ConfirmSensitiveContentText))
                             .setPositiveButton(getString(R.string.Confirm), (di, w) -> {
-                                verifyAge(getContext(), currentAccount, passed -> {
-                                    if (passed) {
-                                        set.run();
-                                    } else {
-                                        BulletinFactory.of(this)
-                                            .createSimpleBulletin(R.raw.error, getString(R.string.AgeVerificationFailedTitle), getString(R.string.AgeVerificationFailedText))
-                                            .show();
-                                    }
-                                }, getResourceProvider());
+                                getMessagesController().setContentSettings(true);
+                                if (view instanceof TextCheckCell) {
+                                    ((TextCheckCell) view).setChecked(getMessagesController().showSensitiveContent());
+                                }
                             })
                             .setNegativeButton(getString(R.string.Cancel), null)
                             .create()
@@ -1326,7 +1298,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                         ((TextCheckCell) view).setChecked(getMessagesController().showSensitiveContent());
                     }
                 }
-            } else if (position == contactsReimportRow) {
+            }*/ else if (position == contactsReimportRow) {
                 //not implemented
             } else if (position == contactsSortRow) {
                 if (getParentActivity() == null) {
@@ -1482,7 +1454,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             highlightSensitiveRow = false;
             listView.scrollToPosition(listAdapter.getItemCount() - 1);
             AndroidUtilities.runOnUIThread(() -> {
-                listView.highlightRow(() -> sensitiveContentRow);
+               // listView.highlightRow(() -> sensitiveContentRow);
             }, 200);
         }
 
@@ -1521,110 +1493,6 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             AndroidUtilities.requestAdjustResize(getParentActivity(), classGuid);
             AndroidUtilities.setAdjustResizeToNothing(getParentActivity(), classGuid);
         }
-    }
-
-    public static void verifyAge(Context context, int currentAccount, Utilities.Callback<Boolean> done, Theme.ResourcesProvider resourcesProvider) {
-        final MessagesController messagesController = MessagesController.getInstance(currentAccount);
-        final String username = messagesController.verifyAgeBotUsername;
-        final String country = messagesController.verifyAgeCountry;
-        final int minAge = messagesController.verifyAgeMin;
-        if (TextUtils.isEmpty(username) || !messagesController.config.needAgeVideoVerification.get()) {
-            done.run(true);
-            return;
-        }
-
-        final BottomSheet.Builder b = new BottomSheet.Builder(context, false, resourcesProvider);
-        final BottomSheet[] sheet = new BottomSheet[1];
-
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(dp(12), 0, dp(12), 0);
-        layout.setClipChildren(false);
-        layout.setClipToPadding(false);
-        b.setCustomView(layout);
-
-        FrameLayout topView = new FrameLayout(context);
-        topView.setBackground(Theme.createCircleDrawable(dp(80), Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider)));
-        ImageView imageView = new ImageView(context);
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setImageResource(R.drawable.filled_verify_age);
-        topView.addView(imageView, LayoutHelper.createFrame(50, 50, Gravity.CENTER));
-        layout.addView(topView, LayoutHelper.createLinear(80, 80, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 8));
-
-        TextView textView = TextHelper.makeTextView(context, 20, Theme.key_dialogTextBlack, true, resourcesProvider);
-        textView.setText(getString(R.string.AgeVerificationTitle));
-        textView.setGravity(Gravity.CENTER);
-        layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 24, 8, 24, 8));
-
-        textView = TextHelper.makeTextView(context, 14, Theme.key_dialogTextBlack, false, resourcesProvider);
-        textView.setText(AndroidUtilities.replaceTags(getString("AgeVerificationText" + country)));
-        textView.setGravity(Gravity.CENTER);
-        layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 24, 0, 24, 0));
-
-        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider);
-        button.setText(getString(R.string.AgeVerificationButton), false);
-        button.setOnClickListener(v -> {
-            if (button.isLoading()) return;
-            button.setLoading(true);
-
-            PermissionRequest.ensurePermission(
-                R.raw.permission_request_camera,
-                R.string.AgeVerificationNeedCameraPermission,
-                Manifest.permission.CAMERA,
-                granted -> {
-                    if (!granted) {
-                        button.setLoading(false);
-                        return;
-                    }
-
-                    messagesController.getUserNameResolver().resolve(username, userId -> {
-                        if (userId == null) {
-                            button.setLoading(false);
-                            return;
-                        }
-                        final TLRPC.User bot = messagesController.getUser(userId);
-                        if (bot == null) {
-                            button.setLoading(false);
-                            return;
-                        }
-
-                        BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
-                        if (lastFragment == null) {
-                            button.setLoading(false);
-                            return;
-                        }
-
-                        final WebViewRequestProps props = WebViewRequestProps.of(currentAccount, userId, userId, null, null, BotWebViewAttachedSheet.TYPE_WEB_VIEW_BOT_MAIN, 0, 0L, false, null, false, null, bot, 0, false, false);
-                        final BotWebViewSheet webViewSheet = new BotWebViewSheet(context, resourcesProvider);
-                        webViewSheet.setOnVerifiedAge((localPassed, age, gender, genderProbability) -> {
-                            final boolean passed = age != null ? age >= minAge : localPassed;
-
-                            webViewSheet.dismiss();
-                            done.run(passed);
-
-                            final BaseFragment lastFragment2 = LaunchActivity.getSafeLastFragment();
-                            if (passed && lastFragment2 != null) {
-                                BulletinFactory.of(lastFragment2)
-                                    .createSimpleBulletin(R.raw.contact_check, getString(R.string.AgeVerificationPassedTitle))
-                                    .show();
-                            }
-                        });
-                        webViewSheet.setDefaultFullsize(true);
-                        webViewSheet.setNeedsContext(false);
-                        webViewSheet.setParentActivity(lastFragment.getParentActivity());
-                        webViewSheet.requestWebView(lastFragment, props);
-                        webViewSheet.show();
-
-                        button.setLoading(false);
-                        sheet[0].dismiss();
-                    });
-                }
-            );
-        });
-        layout.addView(button, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.FILL_HORIZONTAL, 2, 29, 2, 14));
-
-        sheet[0] = b.show();
-        sheet[0].fixNavigationBar();
     }
 
     private void updateMenuItem() {
@@ -2030,7 +1898,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         private final static int TYPE_DEFAULT_THEMES_PREVIEW = 17;
         private final static int TYPE_SAVE_TO_GALLERY = 19;
         private final static int TYPE_APP_ICON = 20;
-        private final static int TYPE_CHOOSE_COLOR = 21;
+        //private final static int TYPE_CHOOSE_COLOR = 21;
 
         private Context mContext;
         private boolean first = true;
@@ -2049,7 +1917,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             int type = holder.getItemViewType();
             return type == 0 || type == TYPE_TEXT_SETTING || type == TYPE_THEME_TYPE || type == TYPE_TEXT_CHECK ||
                     type == TYPE_NIGHT_THEME || type == TYPE_THEME_LIST || type == TYPE_THEME_ACCENT_LIST ||
-                    type == TYPE_TEXT_PREFERENCE || type == 18 || type == TYPE_APP_ICON || type == TYPE_CHOOSE_COLOR;
+                    type == TYPE_TEXT_PREFERENCE || type == 18 || type == TYPE_APP_ICON /*|| type == TYPE_CHOOSE_COLOR*/;
         }
 
         private void showOptionsForTheme(Theme.ThemeInfo themeInfo) {
@@ -2439,9 +2307,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_APP_ICON:
                     view = new AppIconsSelectorCell(mContext, ThemeActivity.this, currentAccount);
                     break;
-                case TYPE_CHOOSE_COLOR:
+                /*case TYPE_CHOOSE_COLOR:
                     view = new PeerColorActivity.ChangeNameColorCell(currentAccount, 0, mContext, getResourceProvider());
-                    break;
+                    break;*/
             }
             return new RecyclerListView.Holder(view);
         }
@@ -2564,9 +2432,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                         headerCell.setText(getString("ChatListSwipeGesture", R.string.ChatListSwipeGesture));
                     } else if (position == selectThemeHeaderRow) {
                         headerCell.setText(getString("SelectTheme", R.string.SelectTheme));
-                    } else if (position == appIconHeaderRow) {
+                    } /*else if (position == appIconHeaderRow) {
                         headerCell.setText(getString(R.string.AppIcon));
-                    } else if (position == otherHeaderRow) {
+                    } */else if (position == otherHeaderRow) {
                         headerCell.setText(getString("OtherSettings", R.string.OtherSettings));
                     } else if (position == mediaSoundHeaderRow) {
                         headerCell.setText(getString("MediaAndSoundSettings", R.string.MediaAndSoundSettings));
@@ -2600,9 +2468,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                         textCheckCell.setTextAndCheck(getString(R.string.PauseMusicOnMedia), SharedConfig.pauseMusicOnMedia, true);
                     } else if (position == directShareRow) {
                         textCheckCell.setTextAndValueAndCheck(getString("DirectShare", R.string.DirectShare), getString("DirectShareInfo", R.string.DirectShareInfo), SharedConfig.directShare, false, true);
-                    } else if (position == sensitiveContentRow) {
+                    } /*else if (position == sensitiveContentRow) {
                         textCheckCell.setTextAndValueAndCheck(getString(R.string.ShowSensitiveContent), getString(R.string.ShowSensitiveContentInfo), getMessagesController().showSensitiveContent(), true, true);
-                    } else if (position == chatBlurRow) {
+                    }*/ else if (position == chatBlurRow) {
                         textCheckCell.setTextAndCheck(getString("BlurInChat", R.string.BlurInChat), SharedConfig.chatBlurEnabled(), true);
                     }
                     break;
@@ -2696,10 +2564,10 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
 
                     break;
                 }
-                case TYPE_CHOOSE_COLOR: {
+                /*case TYPE_CHOOSE_COLOR: {
                     PeerColorActivity.ChangeNameColorCell cell = (PeerColorActivity.ChangeNameColorCell) holder.itemView;
                     cell.set(getUserConfig().getCurrentUser());
-                }
+                }*/
             }
         }
 
@@ -2733,14 +2601,14 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             } else if (position == scheduleHeaderRow || position == automaticHeaderRow || position == preferedHeaderRow ||
                     position == settingsRow || position == themeHeaderRow || position == textSizeHeaderRow ||
                     position == chatListHeaderRow || position == bubbleRadiusHeaderRow || position == swipeGestureHeaderRow ||
-                    position == selectThemeHeaderRow || position == appIconHeaderRow || position == mediaSoundHeaderRow ||
+                    position == selectThemeHeaderRow || /*position == appIconHeaderRow ||*/ position == mediaSoundHeaderRow ||
                     position == otherHeaderRow) {
                 return TYPE_HEADER;
             } else if (position == automaticBrightnessRow) {
                 return TYPE_BRIGHTNESS;
             } else if (position == scheduleLocationRow || position == sendByEnterRow ||
                     position == raiseToSpeakRow || position == raiseToListenRow || position == pauseOnRecordRow ||
-                    position == directShareRow || position == chatBlurRow || position == pauseOnMediaRow || position == nextMediaTapRow || position == sensitiveContentRow) {
+                    position == directShareRow || position == chatBlurRow || position == pauseOnMediaRow || position == nextMediaTapRow /*|| position == sensitiveContentRow*/) {
                 return TYPE_TEXT_CHECK;
             } else if (position == textSizeRow) {
                 return TYPE_TEXT_SIZE;
@@ -2765,11 +2633,11 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 return TYPE_DEFAULT_THEMES_PREVIEW;
             } else if (position == saveToGalleryOption1Row || position == saveToGalleryOption2Row) {
                 return TYPE_SAVE_TO_GALLERY;
-            } else if (position == appIconSelectorRow) {
+            } /*else if (position == appIconSelectorRow) {
                 return TYPE_APP_ICON;
             } else if (position == changeUserColor) {
                 return TYPE_CHOOSE_COLOR;
-            }
+            }*/
             return TYPE_TEXT_SETTING;
         }
     }

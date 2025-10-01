@@ -21,7 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;

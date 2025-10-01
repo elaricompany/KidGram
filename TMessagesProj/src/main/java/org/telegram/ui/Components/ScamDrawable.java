@@ -11,7 +11,7 @@ import android.text.TextPaint;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 
 public class ScamDrawable extends Drawable {
 

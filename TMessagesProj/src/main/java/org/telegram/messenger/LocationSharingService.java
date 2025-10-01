@@ -16,6 +16,7 @@ import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
 

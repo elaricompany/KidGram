@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.ui.ActionBar.Theme;
 
@@ -88,7 +88,7 @@ public class ForumBubbleDrawable extends Drawable {
 
     @Override
     public void setAlpha(int alpha) {
-        svgDrawable.setAlpha(alpha);
+
     }
 
     @Override

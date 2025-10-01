@@ -30,6 +30,11 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.C;
+import org.telegram.elari.elariapi.pojo.AccessRequest;
+import org.telegram.elari.elariapi.pojo.ChatAccess;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
@@ -38,7 +43,7 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -103,8 +108,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             VIEW_TYPE_FOLDER_UPDATE_HINT = 17,
             VIEW_TYPE_STORIES = 18,
             VIEW_TYPE_ARCHIVE_FULLSCREEN = 19,
-            VIEW_TYPE_GRAY_SECTION = 20,
-            VIEW_TYPE_FORWARD_TO_STORIES_CELL = 21;
+            VIEW_TYPE_GRAY_SECTION = 20;
 
     private Context mContext;
     private ArchiveHintCell archiveHintCell;
@@ -114,7 +118,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     private int prevContactsCount;
     private int prevDialogsCount;
     private int dialogsType;
-    private boolean allowForwardAsStories;
     private int folderId;
     private long openedDialogId;
     private int currentCount;
@@ -179,9 +182,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         if (hasHints) {
             position -= 2 + MessagesController.getInstance(currentAccount).hintDialogs.size();
         }
-        if (allowForwardAsStories && dialogsType == DialogsActivity.DIALOGS_TYPE_FORWARD) {
-            position -= 1;
-        }
         if (dialogsType == DialogsActivity.DIALOGS_TYPE_IMPORT_HISTORY_GROUPS || dialogsType == DialogsActivity.DIALOGS_TYPE_IMPORT_HISTORY) {
             position -= 2;
         } else if (dialogsType == DialogsActivity.DIALOGS_TYPE_IMPORT_HISTORY_USERS) {
@@ -197,14 +197,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     public void setDialogsType(int type) {
         dialogsType = type;
         notifyDataSetChanged();
-    }
-
-    public void setAllowForwardAsStories(boolean allowForwardAsStories) {
-        this.allowForwardAsStories = allowForwardAsStories;
-    }
-
-    public boolean isAllowForwardAsStories() {
-        return allowForwardAsStories;
     }
 
     public int getDialogsType() {
@@ -516,6 +508,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                 return oldItems.get(oldItemPosition).viewType == newItems.get(newItemPosition).viewType;
             }
         };
+
         if (itemInternals.size() < 50 || !ALLOW_UPDATE_IN_BACKGROUND) {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
             isCalculatingDiff = false;
@@ -581,7 +574,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view;
         switch (viewType) {
-            case VIEW_TYPE_FORWARD_TO_STORIES_CELL:
             case VIEW_TYPE_DIALOG:
                 if (dialogsType == DialogsActivity.DIALOGS_TYPE_ADD_USERS_TO ||
                     dialogsType == DialogsActivity.DIALOGS_TYPE_BOT_REQUEST_PEER) {
@@ -595,9 +587,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                     dialogCell.setPreloader(preloader);
                     dialogCell.setDialogCellDelegate(this);
                     dialogCell.setIsTransitionSupport(isTransitionSupport);
-                    if (viewType == VIEW_TYPE_FORWARD_TO_STORIES_CELL) {
-                        dialogCell.setIsShareToStoryCell();
-                    }
                     view = dialogCell;
                 }
                 if (dialogsType == DialogsActivity.DIALOGS_TYPE_BOT_REQUEST_PEER) {
@@ -813,25 +802,32 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
+//Log.e("ArtTest", " holder.getItemViewType() " + holder.getItemViewType());
         switch (holder.getItemViewType()) {
-            case VIEW_TYPE_FORWARD_TO_STORIES_CELL: {
-                TLRPC.Dialog nextDialog = (TLRPC.Dialog) getItem(i + 1);
-
-                DialogCell cell = (DialogCell) holder.itemView;
-                DialogCell.CustomDialog customDialog = new DialogCell.CustomDialog();
-                customDialog.name = getString(R.string.StoriesForwardTitle);
-                customDialog.message = getString(R.string.StoriesForwardText);
-
-                cell.useSeparator = nextDialog != null;
-                cell.fullSeparator = nextDialog != null && !nextDialog.pinned;
-
-                cell.setDialog(customDialog);
-                cell.checkHeight();
-                break;
-            }
             case VIEW_TYPE_DIALOG: {
                 TLRPC.Dialog dialog = (TLRPC.Dialog) getItem(i);
                 TLRPC.Dialog nextDialog = (TLRPC.Dialog) getItem(i + 1);
+
+                long accesStatys = C.ACCESS_WAIT;
+
+                for(ChatAccess ca : DialogsActivity.accessList){
+                    //Log.e("ArtTest", "" + ca.getId() + " | " + dialog.id + " = " + (ca.getId() == dialog.id));
+                    if(Math.abs(ca.getId()) == Math.abs(dialog.id)){
+                        accesStatys = ca.getAccess();
+                        //Log.e("ArtTest", "" + dialog.id  + " | " + accesStatys);
+                        break;
+                    }
+                }
+
+//                if(accesStatys == C.ACCESS_DENIED){
+//                    DialogCell cell = (DialogCell) holder.itemView;
+//                    cell.heightDefault = 30;
+//                    return;
+//                }else{
+//                    DialogCell cell = (DialogCell) holder.itemView;
+//                    cell.heightDefault = 72;
+//                }
+
                 if (dialogsType == DialogsActivity.DIALOGS_TYPE_ADD_USERS_TO || dialogsType == DialogsActivity.DIALOGS_TYPE_BOT_REQUEST_PEER) {
                     ProfileSearchCell cell = (ProfileSearchCell) holder.itemView;
                     long oldDialogId = cell.getDialogId();
@@ -913,13 +909,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                         } else {
                             cell.setCustomMessage(null);
                         }
-                    } else if (i == 1 && parentFragment != null && dialogsType == DialogsActivity.DIALOGS_TYPE_FORWARD && parentFragment.forwardOriginalChannel != 0 && dialog.top_message == 0) {
-                        MessagesController.DialogFilter filter = getCurrentFilter();
-                        if (filter == null || filter.isDefault()) {
-                            cell.setCustomMessage(DialogObject.getStatus(parentFragment.forwardOriginalChannel));
-                        } else {
-                            cell.setCustomMessage(null);
-                        }
                     } else {
                         cell.setCustomMessage(null);
                     }
@@ -929,6 +918,21 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                         cell.collapsed = collapsedView;
                         cell.requestLayout();
                     }
+
+//"ArtTest - блокируем элемент
+
+//cell.setAccess(accesStatys);
+//if(accesStatys == C.ACCESS_DENIED){
+//    cell.setVisible(false);
+//    cell.setClickable(true);
+//} else if (accesStatys == C.ACCESS_WAIT) {
+//    //cell.avatarImage.setImageBitmap(mContext.getDrawable(R.drawable.ic_kidgram_logo));
+//    cell.setVisible(true);
+//    cell.setClickable(true);
+//}else {
+//    cell.setVisible(true);
+//    cell.setClickable(false);
+//}
                     if (preloader != null && i < 10) {
                         preloader.add(dialog.id);
                     }
@@ -1015,12 +1019,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                 if (parentFragment != null && parentFragment.isReplyTo) {
                     if (i == 0) {
                         cell.setText(getString(R.string.ReplyDialogMessageAuthor));
-                    } else {
-                        cell.setText(getString(R.string.ReplyDialogYourChats));
-                    }
-                } else if (dialogsType == DialogsActivity.DIALOGS_TYPE_FORWARD) {
-                    if (i == 0) {
-                        cell.setText(getString(R.string.ForwardDialogYourChannel));
                     } else {
                         cell.setText(getString(R.string.ReplyDialogYourChats));
                     }
@@ -1457,15 +1455,41 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
 
 
     private void updateItemList() {
+//Log.e("ArtTest" , "-----updateItemList----");
         itemInternals.clear();
         updateHasHints();
-
         MessagesController messagesController = MessagesController.getInstance(currentAccount);
         ArrayList<TLRPC.Dialog> array = parentFragment.getDialogsArray(currentAccount, dialogsType, folderId, dialogsListFrozen);
+
+
+
+//ArtTest!!!!
+        /*ArrayList<TLRPC.Dialog> array2 = new ArrayList<>();
+        for (TLRPC.Dialog dlg: array){
+            boolean needAdd = true;
+            for(ChatAccess ca : DialogsActivity.accessList){
+                if( (Math.abs(ca.getId()) == Math.abs(dlg.id)) && (ca.getAccess() == C.ACCESS_DENIED)){
+                    needAdd = false;
+                    break;
+                }
+            }
+            if(needAdd){array2.add(dlg);}
+        }
+
+        if(!array2.isEmpty()) {
+            array.clear();
+            array.addAll(array2);
+        }*/
+
+
+
+
+
         if (array == null) {
             array = new ArrayList<>();
         }
         dialogsCount = array.size();
+
         isEmpty = false;
         if (dialogsCount == 0 && parentFragment.isArchive()) {
             itemInternals.add(new ItemInternal(VIEW_TYPE_ARCHIVE_FULLSCREEN));
@@ -1507,21 +1531,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             if (foundDialog == null) {
                 foundDialog = new TLRPC.TL_dialog();
                 foundDialog.id = parentFragment.replyMessageAuthor;
-            }
-            itemInternals.add(new ItemInternal(VIEW_TYPE_DIALOG, foundDialog));
-            itemInternals.add(new ItemInternal(VIEW_TYPE_GRAY_SECTION));
-        } else if ((filter == null || filter.isDefault()) && parentFragment != null && dialogsType == DialogsActivity.DIALOGS_TYPE_FORWARD && parentFragment.forwardOriginalChannel != 0) {
-            itemInternals.add(new ItemInternal(VIEW_TYPE_GRAY_SECTION));
-            TLRPC.Dialog foundDialog = null;
-            for (int i = 0; i < array.size(); ++i) {
-                if (array.get(i).id == parentFragment.forwardOriginalChannel) {
-                    foundDialog = array.get(i);
-                    break;
-                }
-            }
-            if (foundDialog == null) {
-                foundDialog = new TLRPC.TL_dialog();
-                foundDialog.id = parentFragment.forwardOriginalChannel;
             }
             itemInternals.add(new ItemInternal(VIEW_TYPE_DIALOG, foundDialog));
             itemInternals.add(new ItemInternal(VIEW_TYPE_GRAY_SECTION));
@@ -1604,10 +1613,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
 
         if ((requestPeerType instanceof TLRPC.TL_requestPeerTypeBroadcast || requestPeerType instanceof TLRPC.TL_requestPeerTypeChat) && dialogsCount > 0) {
             itemInternals.add(new ItemInternal(VIEW_TYPE_TEXT));
-        }
-
-        if (allowForwardAsStories && dialogsType == DialogsActivity.DIALOGS_TYPE_FORWARD) {
-            itemInternals.add(new ItemInternal(VIEW_TYPE_FORWARD_TO_STORIES_CELL));
         }
 
         if (!stopUpdate) {

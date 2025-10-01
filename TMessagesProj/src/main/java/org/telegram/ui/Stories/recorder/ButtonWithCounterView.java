@@ -12,7 +12,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -26,7 +25,7 @@ import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AnimatedTextView;
@@ -48,23 +47,10 @@ public class ButtonWithCounterView extends FrameLayout implements Loadable {
     private float countAlpha;
     private final AnimatedFloat countAlphaAnimated = new AnimatedFloat(350, CubicBezierInterpolator.EASE_OUT_QUINT);
     public final View rippleView;
-    private boolean filled;
+    private final boolean filled;
 
     public ButtonWithCounterView(Context context, Theme.ResourcesProvider resourcesProvider) {
         this(context, true, resourcesProvider);
-    }
-
-    public void setFilled(boolean filled) {
-        if (this.filled == filled) return;
-        this.filled = filled;
-        if (filled) {
-            setBackground(Theme.createRoundRectDrawable(dp(8), Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider)));
-            text.setTypeface(AndroidUtilities.bold());
-        } else {
-            setBackground(null);
-            text.setTypeface(null);
-        }
-        updateColors();
     }
 
     public ButtonWithCounterView(Context context, boolean filled, Theme.ResourcesProvider resourcesProvider) {
@@ -201,10 +187,6 @@ public class ButtonWithCounterView extends FrameLayout implements Loadable {
         text.setText(newText, animated, moveDown);
         setContentDescription(newText);
         invalidate();
-    }
-
-    public TextPaint getTextPaint() {
-        return text.getPaint();
     }
 
     private float subTextT = 0f;

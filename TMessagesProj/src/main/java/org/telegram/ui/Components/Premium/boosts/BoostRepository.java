@@ -213,7 +213,7 @@ public class BoostRepository {
                 .setProductId(option.store_product)
                 .build();
         BillingController.getInstance().queryProductDetails(Arrays.asList(product), (billingResult, list) -> {
-            ProductDetails.OneTimePurchaseOfferDetails offerDetails = list.get(0).getOneTimePurchaseOfferDetails();
+            ProductDetails.OneTimePurchaseOfferDetails offerDetails = list.getProductDetailsList().get(0).getOneTimePurchaseOfferDetails();
             payload.currency = offerDetails.getPriceCurrencyCode();
             payload.amount = (long) ((offerDetails.getPriceAmountMicros() / Math.pow(10, 6)) * Math.pow(10, BillingController.getInstance().getCurrencyExp(option.currency)));
 
@@ -225,7 +225,7 @@ public class BoostRepository {
                     return;
                 }
                 if (response != null) {
-                    BillingController.getInstance().addResultListener(list.get(0).getProductId(), billingResult1 -> {
+                    BillingController.getInstance().addResultListener(list.getProductDetailsList().get(0).getProductId(), billingResult1 -> {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             AndroidUtilities.runOnUIThread(() -> onSuccess.run(null));
                         }
@@ -236,7 +236,7 @@ public class BoostRepository {
                     BillingController.getInstance().launchBillingFlow(
                             baseFragment.getParentActivity(), AccountInstance.getInstance(UserConfig.selectedAccount), payload,
                             Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(list.get(0))
+                                    .setProductDetails(list.getProductDetailsList().get(0))
                                     .build())
                     );
                 }
@@ -453,7 +453,7 @@ public class BoostRepository {
                 .setProductId(option.store_product)
                 .build();
         BillingController.getInstance().queryProductDetails(Arrays.asList(product), (billingResult, list) -> {
-            ProductDetails.OneTimePurchaseOfferDetails offerDetails = list.get(0).getOneTimePurchaseOfferDetails();
+            ProductDetails.OneTimePurchaseOfferDetails offerDetails = list.getProductDetailsList().get(0).getOneTimePurchaseOfferDetails();
             payload.currency = offerDetails.getPriceCurrencyCode();
             payload.amount = (long) ((offerDetails.getPriceAmountMicros() / Math.pow(10, 6)) * Math.pow(10, BillingController.getInstance().getCurrencyExp(option.currency)));
 
@@ -465,7 +465,7 @@ public class BoostRepository {
                     return;
                 }
                 if (response != null) {
-                    BillingController.getInstance().addResultListener(list.get(0).getProductId(), billingResult1 -> {
+                    BillingController.getInstance().addResultListener(list.getProductDetailsList().get(0).getProductId(), billingResult1 -> {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             AndroidUtilities.runOnUIThread(() -> onSuccess.run(null));
                         }
@@ -476,7 +476,7 @@ public class BoostRepository {
                     BillingController.getInstance().launchBillingFlow(
                             baseFragment.getParentActivity(), AccountInstance.getInstance(UserConfig.selectedAccount), payload,
                             Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(list.get(0))
+                                    .setProductDetails(list.getProductDetailsList().get(0))
                                     .build())
                     );
                 }
@@ -625,7 +625,7 @@ public class BoostRepository {
                     return;
                 }
                 BillingController.getInstance().queryProductDetails(products, (billingResult, list) -> {
-                    for (ProductDetails productDetails : list) {
+                    for (ProductDetails productDetails : list.getProductDetailsList()) {
                         ProductDetails.OneTimePurchaseOfferDetails offerDetails = productDetails.getOneTimePurchaseOfferDetails();
                         for (TLRPC.TL_premiumGiftCodeOption option : result) {
                             if (option.store_product != null && option.store_product.equals(productDetails.getProductId())) {

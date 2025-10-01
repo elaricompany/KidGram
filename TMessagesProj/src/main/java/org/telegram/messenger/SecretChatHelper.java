@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import org.elarikg.messenger.R;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;

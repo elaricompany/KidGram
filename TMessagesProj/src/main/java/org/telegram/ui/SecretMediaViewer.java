@@ -84,7 +84,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
@@ -981,7 +981,6 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
             windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         }
         windowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_SECURE;
-        AndroidUtilities.logFlagSecure();
         centerImage.setParentView(containerView);
         centerImage.setForceCrossfade(true);
 

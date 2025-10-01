@@ -16,7 +16,7 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
@@ -92,7 +92,7 @@ public class BoostPagerBottomSheet extends BottomSheet {
             }
 
             @Override
-            public void onTabAnimationUpdate(boolean manual) {
+            protected void onTabAnimationUpdate(boolean manual) {
                 float percent = viewPager.getPositionAnimated();
                 if (percent > 0f && percent < 1f) {
                     if (!isScrolling) {

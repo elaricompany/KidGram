@@ -1,7 +1,5 @@
 package androidx.recyclerview.widget;
 
-import static org.telegram.messenger.AndroidUtilities.dp;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -566,10 +564,7 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
                             params.lastDrawingBackgroundRect.bottom != chatMessageCell.getBackgroundDrawableBottom()) {
                         moveInfo.deltaBottom = chatMessageCell.getBackgroundDrawableBottom() - params.lastDrawingBackgroundRect.bottom;
                         moveInfo.deltaTop = chatMessageCell.getBackgroundDrawableTop() - params.lastDrawingBackgroundRect.top;
-                        if (chatMessageCell.isSideMenuEnabled != params.lastDrawingSideMenuEnabled) {
-                            moveInfo.deltaLeft = (chatMessageCell.getBackgroundDrawableLeft() - params.lastDrawingBackgroundRect.left);
-                            moveInfo.deltaRight = (chatMessageCell.getBackgroundDrawableRight() - params.lastDrawingBackgroundRect.right);
-                        } else if (isOut) {
+                        if (isOut) {
                             moveInfo.deltaLeft = chatMessageCell.getBackgroundDrawableLeft() - params.lastDrawingBackgroundRect.left;
                         } else {
                             moveInfo.deltaRight = chatMessageCell.getBackgroundDrawableRight() - params.lastDrawingBackgroundRect.right;

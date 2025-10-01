@@ -56,7 +56,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -99,7 +99,6 @@ import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
-import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.UndoView;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
 
@@ -357,11 +356,11 @@ public class FilterCreateActivity extends BaseFragment {
             items.add(ItemInner.asShadow(LocaleController.getString(R.string.FilterExcludeInfo)));
         }
 
-        if (getMessagesController().folderTags || !getUserConfig().isPremium()) {
+        /*if (getMessagesController().folderTags || !getUserConfig().isPremium()) {
             items.add(new ItemInner(VIEW_TYPE_HEADER_COLOR_PREVIEW, false));
             items.add(new ItemInner(VIEW_TYPE_COLOR, false));
             items.add(ItemInner.asShadow(LocaleController.getString(R.string.FolderTagColorInfo)));
-        }
+        }*/
 
         if (invites.isEmpty()) {
             items.add(ItemInner.asHeader(LocaleController.getString(R.string.FilterShareFolder), true));
@@ -1686,14 +1685,14 @@ public class FilterCreateActivity extends BaseFragment {
                     break;
                 }
                 case VIEW_TYPE_HEADER_COLOR_PREVIEW: {
-                    folderTagsHeader = (HeaderCellColorPreview) holder.itemView;
+                    /*folderTagsHeader = (HeaderCellColorPreview) holder.itemView;
                     folderTagsHeader.setPreviewText(AnimatedEmojiSpan.cloneSpans(newFilterName, -1, folderTagsHeader.getPreviewTextPaint().getFontMetricsInt(), .5f), false);
                     folderTagsHeader.setPreviewColor(!getUserConfig().isPremium() ? -1 : newFilterColor, false);
-                    folderTagsHeader.setText(LocaleController.getString(R.string.FolderTagColor));
+                    folderTagsHeader.setText(LocaleController.getString(R.string.FolderTagColor));*/
                     break;
                 }
                 case VIEW_TYPE_COLOR: {
-                    PeerColorActivity.PeerColorGrid cell = (PeerColorActivity.PeerColorGrid) holder.itemView;
+                    /*PeerColorActivity.PeerColorGrid cell = (PeerColorActivity.PeerColorGrid) holder.itemView;
                     cell.setCloseAsLock(!getUserConfig().isPremium());
                     cell.setSelected(!getUserConfig().isPremium() ? -1 : newFilterColor, false);
                     cell.setOnColorClick(color -> {
@@ -1706,7 +1705,7 @@ public class FilterCreateActivity extends BaseFragment {
                             folderTagsHeader.setPreviewColor(!getUserConfig().isPremium() ? -1 : newFilterColor, true);
                         }
                         checkDoneButton(true);
-                    });
+                    });*/
                     break;
                 }
             }
@@ -2282,12 +2281,9 @@ public class FilterCreateActivity extends BaseFragment {
             return (int) (dp(10) + width);
         }
 
-        public boolean usePaintAlpha;
         @Override
         public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float _x, int top, int _y, int bottom, @NonNull Paint paint) {
             makeLayout();
-
-            final float alpha = usePaintAlpha ? paint.getAlpha() / 255.0f : 1.0f;
 
             int color = this.color;
             if (color == 0) {
@@ -2299,8 +2295,6 @@ public class FilterCreateActivity extends BaseFragment {
             } else {
                 textPaint.setColor(AndroidUtilities.computePerceivedBrightness(color) > .721f ? Color.BLACK : Color.WHITE);
             }
-            bgPaint.setAlpha((int) (bgPaint.getAlpha() * alpha));
-            textPaint.setAlpha((int) (textPaint.getAlpha() * alpha));
 
             float x = _x + dp(2), y = _y - height + dp(1);
             AndroidUtilities.rectTmp.set(x, y, x + width, y + height);
@@ -2321,37 +2315,6 @@ public class FilterCreateActivity extends BaseFragment {
             canvas.translate(x, y);
             layout.draw(canvas);
             canvas.restore();
-        }
-    }
-
-    public static class TextSpan extends ReplacementSpan {
-
-        private final Theme.ResourcesProvider resourcesProvider;
-        Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private int colorKey;
-        private Text text;
-
-        public TextSpan(String text, float fontSize, int colorKey, Theme.ResourcesProvider resourcesProvider) {
-            this.resourcesProvider = resourcesProvider;
-            this.colorKey = colorKey;
-            this.text = new Text(text, fontSize, AndroidUtilities.bold());
-            bgPaint.setStyle(Paint.Style.FILL);
-        }
-
-        @Override
-        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end, @Nullable Paint.FontMetricsInt fm) {
-            return (int) (dp(9.33f) + this.text.getWidth());
-        }
-
-        @Override
-        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float _x, int top, int _y, int bottom, @NonNull Paint paint) {
-            final int color = Theme.getColor(colorKey, resourcesProvider);
-            bgPaint.setColor(Theme.multAlpha(color, .15f));
-            final float cy = (bottom + top) / 2f;
-            final float height = dp(14.66f);
-            AndroidUtilities.rectTmp.set(_x, cy - height / 2f, _x + this.text.getWidth() + dp(9.33f), cy + height / 2f);
-            canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(4), dp(4), bgPaint);
-            this.text.draw(canvas, _x + dp(4.66f), cy, color, 1.0f);
         }
     }
 
@@ -2815,7 +2778,8 @@ public class FilterCreateActivity extends BaseFragment {
             noTag = new TextView(getContext());
             noTag.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             noTag.setTextColor(FilterCreateActivity.this.getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-            noTag.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.FolderTagNoColor : R.string.FolderTagNoColorPremium));
+            //noTag.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.FolderTagNoColor : R.string.FolderTagNoColorPremium));
+            noTag.setText("");
             noTag.setGravity(Gravity.RIGHT);
             addView(noTag, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, padding, 16.66f, padding, bottomMargin));
             noTag.setAlpha(0f);
@@ -2842,8 +2806,8 @@ public class FilterCreateActivity extends BaseFragment {
 
         private boolean noTagShown;
         public void setPreviewColor(int colorId, boolean animated) {
-            noTag.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.FolderTagNoColor : R.string.FolderTagNoColorPremium));
-
+            //noTag.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.FolderTagNoColor : R.string.FolderTagNoColorPremium));
+            noTag.setText("");
             final boolean noTag = colorId < 0;
             currentColor = noTag ? 0 : FilterCreateActivity.this.getThemedColor(Theme.keys_avatar_nameInMessage[colorId % Theme.keys_avatar_nameInMessage.length]);
             if (!noTag) {

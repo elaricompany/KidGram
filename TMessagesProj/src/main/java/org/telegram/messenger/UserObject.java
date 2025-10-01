@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import org.elarikg.messenger.R;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;

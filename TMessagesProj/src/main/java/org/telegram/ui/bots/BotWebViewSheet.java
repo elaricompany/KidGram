@@ -73,7 +73,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
@@ -212,7 +212,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
     private long peerId;
     private long queryId;
     private int replyToMsgId;
-    private long monoforumTopicId;
     private boolean silent;
     private String buttonText;
 
@@ -267,14 +266,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             prolongWebView.silent = silent;
             if (replyToMsgId != 0) {
                 prolongWebView.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
-                if (monoforumTopicId != 0) {
-                    prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
-                    prolongWebView.reply_to.flags |= 32;
-                }
-                prolongWebView.flags |= 1;
-            } else if (monoforumTopicId != 0) {
-                prolongWebView.reply_to = new TLRPC.TL_inputReplyToMonoForum();
-                prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
                 prolongWebView.flags |= 1;
             }
             ConnectionsManager.getInstance(currentAccount).sendRequest(prolongWebView, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
@@ -532,7 +523,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                 invalidate();
             }
         };
-        webViewContainer.setOnVerifiedAge(onVerifiedAge);
         webViewContainer.setDelegate(new BotWebViewContainer.Delegate() {
             private boolean sentWebViewData;
 
@@ -1335,14 +1325,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         return false;
     }
 
-    private Utilities.Callback4<Boolean, Double, String, Double> onVerifiedAge;
-    public void setOnVerifiedAge(Utilities.Callback4<Boolean, Double, String, Double> callback) {
-        onVerifiedAge = callback;
-        if (webViewContainer != null) {
-            webViewContainer.setOnVerifiedAge(onVerifiedAge);
-        }
-    }
-
     Drawable verifiedDrawable;
 
     public void requestWebView(BaseFragment fragment, WebViewRequestProps props) {
@@ -1351,7 +1333,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         this.peerId = props.peerId;
         this.botId = props.botId;
         this.replyToMsgId = props.replyToMsgId;
-        this.monoforumTopicId = props.monoforumTopicId;
         this.silent = props.silent;
         this.buttonText = props.buttonText;
         this.currentWebApp = props.app;
@@ -1435,9 +1416,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             }
         }
 
-        if (onVerifiedAge == null) {
-            menu.addItem(R.id.menu_collapse_bot, R.drawable.arrow_more);
-        }
+        menu.addItem(R.id.menu_collapse_bot, R.drawable.arrow_more);
         optionsItem = menu.addItem(0, optionsIcon = new BotFullscreenButtons.OptionsIcon(getContext()));
         optionsItem.setOnClickListener(v -> {
             openOptions();
@@ -1541,14 +1520,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
 
                     if (replyToMsgId != 0) {
                         req.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
-                        if (monoforumTopicId != 0) {
-                            req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
-                            req.reply_to.flags |= 32;
-                        }
-                        req.flags |= 1;
-                    } else if (monoforumTopicId != 0) {
-                        req.reply_to = new TLRPC.TL_inputReplyToMonoForum();
-                        req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
                         req.flags |= 1;
                     }
 
@@ -1673,13 +1644,13 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             o.addGap();
         }
         o
-            .addIf(onVerifiedAge == null, R.drawable.msg_bot, LocaleController.getString(R.string.BotWebViewOpenBot), () -> {
+            .add(R.drawable.msg_bot, LocaleController.getString(R.string.BotWebViewOpenBot), () -> {
                 if (parentActivity instanceof LaunchActivity) {
                     ((LaunchActivity) parentActivity).presentFragment(ChatActivity.of(botId));
                 }
                 dismiss(true);
             })
-            .addIf(onVerifiedAge == null && hasSettings, R.drawable.msg_settings, LocaleController.getString(R.string.BotWebViewSettings), () -> {
+            .addIf(hasSettings, R.drawable.msg_settings, LocaleController.getString(R.string.BotWebViewSettings), () -> {
                 webViewContainer.onSettingsButtonPressed();
             })
             .add(R.drawable.msg_retry, LocaleController.getString(R.string.BotWebViewReloadPage), () -> {
@@ -1696,13 +1667,13 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                 webViewContainer.loadFlickerAndSettingsItem(currentAccount, botId, null);
                 webViewContainer.reload();
             })
-            .addIf(onVerifiedAge == null && userbot != null && userbot.bot_has_main_app, R.drawable.msg_home, LocaleController.getString(R.string.AddShortcut), () -> {
+            .addIf(userbot != null && userbot.bot_has_main_app, R.drawable.msg_home, LocaleController.getString(R.string.AddShortcut), () -> {
                 MediaDataController.getInstance(currentAccount).installShortcut(botId, MediaDataController.SHORTCUT_TYPE_ATTACHED_BOT);
             })
-            .addIf(onVerifiedAge == null, R.drawable.menu_intro, LocaleController.getString(R.string.BotWebViewToS), () -> {
+            .add(R.drawable.menu_intro, LocaleController.getString(R.string.BotWebViewToS), () -> {
                 Browser.openUrl(getContext(), LocaleController.getString(R.string.BotWebViewToSLink));
             })
-            .addIf(onVerifiedAge == null && currentBot != null && (currentBot.show_in_side_menu || currentBot.show_in_attach_menu), R.drawable.msg_delete, LocaleController.getString(R.string.BotWebViewDeleteBot), () -> {
+            .addIf(currentBot != null && (currentBot.show_in_side_menu || currentBot.show_in_attach_menu), R.drawable.msg_delete, LocaleController.getString(R.string.BotWebViewDeleteBot), () -> {
                 deleteBot(currentAccount, botId, () -> dismiss());
             });
 
@@ -2035,10 +2006,6 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         if (dismissed) {
             return;
         }
-        if (onVerifiedAge != null) {
-            intoTabs = false;
-        }
-
         dismissed = true;
         setOpen(false);
         AndroidUtilities.cancelRunOnUIThread(pollRunnable);

@@ -8,6 +8,8 @@
 
 package org.telegram.ui;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -57,6 +59,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.ElariGlobalVar;
+import org.telegram.elari.ElariUtils;
+import org.telegram.elari.ui.dialogs.ToastDialog;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
@@ -68,7 +75,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SecretChatHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
@@ -287,6 +294,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                     } else {
                         finishFragment();
                     }
+
                 } else if (id == delete) {
                     performSelectedContactsDelete();
                 } else if (id == sort_button) {
@@ -294,14 +302,20 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                     sortByName = SharedConfig.sortContactsByName;
                     listViewAdapter.setSortType(sortByName ? 1 : 2, false);
                     sortItem.setIcon(sortByName ? R.drawable.msg_contacts_time : R.drawable.msg_contacts_name);
+                }else if((ElariGlobalVar.isDisabledSearch) &&(id == search_button)){
+                    ToastDialog.getInstance(getParentActivity()).show(new ToastDialog.ToastMessage(getParentActivity(), getString(R.string.block_serch_text)));
                 }
             }
         });
 
         ActionBarMenu menu = actionBar.createMenu();
-        ActionBarMenuItem item = menu.addItem(search_button, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
+        ActionBarMenuItem item = menu.addItem(search_button, R.drawable.ic_ab_search).setIsSearchField(!ElariGlobalVar.isDisabledSearch).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
             @Override
             public void onSearchExpand() {
+                if(ElariGlobalVar.isDisabledSearch){
+                    ToastDialog.getInstance(getParentActivity()).show(new ToastDialog.ToastMessage(getParentActivity(), getString(R.string.block_serch_text)));
+                    return;
+                }
                 searching = true;
                 if (floatingButtonContainer != null) {
                     floatingButtonContainer.setVisibility(View.GONE);
@@ -309,10 +323,15 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 if (sortItem != null) {
                     sortItem.setVisibility(View.GONE);
                 }
+
             }
 
             @Override
             public void onSearchCollapse() {
+                if(ElariGlobalVar.isDisabledSearch){
+                    ToastDialog.getInstance(getParentActivity()).show(new ToastDialog.ToastMessage(getParentActivity(), getString(R.string.block_serch_text)));
+                    return;
+                }
                 searchListViewAdapter.searchDialogs(null);
                 searching = false;
                 searchWas = false;
@@ -336,6 +355,10 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
 
             @Override
             public void onTextChanged(EditText editText) {
+                if(ElariGlobalVar.isDisabledSearch){
+                    ToastDialog.getInstance(getParentActivity()).show(new ToastDialog.ToastMessage(getParentActivity(), getString(R.string.block_serch_text)));
+                    return;
+                }
                 if (searchListViewAdapter == null) {
                     return;
                 }
@@ -481,9 +504,10 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
         listView.setAnimateEmptyView(true, RecyclerListView.EMPTY_VIEW_ANIMATION_TYPE_ALPHA);
 
         listView.setOnItemClickListener((view, position, x, y) -> {
+            Log.e("ArtTest","ContactActivity contact click ");
+
             if (listView.getAdapter() == searchListViewAdapter) {
                 Object object = searchListViewAdapter.getItem(position);
-
                 if (!selectedContacts.isEmpty() && view instanceof ProfileSearchCell) {
                     ProfileSearchCell cell = (ProfileSearchCell) view;
                     if (cell.getUser() != null && cell.getUser().contact) {
@@ -514,6 +538,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                             creatingChat = true;
                             SecretChatHelper.getInstance(currentAccount).startSecretChat(getParentActivity(), user);
                         } else {
+                            if(ElariUtils.sendChatRequest(ContactsActivity.this, getContext(), user.id, null, user)){Log.e("Arttest", "Contact Block!"); return;}
                             Bundle args = new Bundle();
                             args.putLong("user_id", user.id);
                             if (getMessagesController().checkCanOpenChat(args, ContactsActivity.this)) {
@@ -634,6 +659,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                             } else {
                                 Bundle args = new Bundle();
                                 args.putLong("user_id", user.id);
+                                if(ElariUtils.sendChatRequest(ContactsActivity.this, getContext(), user.id, null, user)){Log.e("Arttest", "Contact Block!"); return;};
                                 if (getMessagesController().checkCanOpenChat(args, ContactsActivity.this)) {
                                     presentFragment(new ChatActivity(args), needFinishFragment);
                                 }
@@ -844,7 +870,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 drawable = combinedDrawable;
             }
-            floatingButton.setBackground(drawable);
+            floatingButton.setBackgroundDrawable(drawable);
             floatingButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY));
             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
             boolean configAnimationsEnabled = preferences.getBoolean("view_animations", true);

@@ -21,7 +21,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -140,7 +140,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 view = new DrawerUserCell(mContext);
                 break;
             case 5:
-                view = new DrawerAddCell(mContext);
+                //view = new DrawerAddCell(mContext);
+                view = new EmptyCell(mContext, AndroidUtilities.dp(0));
                 break;
             case 1:
             default:
@@ -342,7 +343,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         items.add(new Item(8, LocaleController.getString(R.string.Settings), settingsIcon));
         items.add(null); // divider
         items.add(new Item(7, LocaleController.getString(R.string.InviteFriends), inviteIcon));
-        items.add(new Item(13, LocaleController.getString(R.string.TelegramFeatures), helpIcon));
+        //items.add(new Item(13, LocaleController.getString(R.string.TelegramFeatures), helpIcon));
     }
 
     public boolean click(View view, int position) {

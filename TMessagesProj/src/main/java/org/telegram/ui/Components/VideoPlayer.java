@@ -86,7 +86,7 @@ import org.telegram.messenger.FourierTransform;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.chromecast.ChromecastMedia;
@@ -832,11 +832,7 @@ public class VideoPlayer implements Player.Listener, VideoListener, AnalyticsLis
         for (int i = 0; i < documents.size(); ++i) {
             try {
                 final TLRPC.Document document = documents.get(i);
-                if (
-                    "application/x-mpegurl".equalsIgnoreCase(document.mime_type) ||
-                    "application/x-tgstoryboard".equalsIgnoreCase(document.mime_type) ||
-                    "application/x-tgstoryboardmap".equalsIgnoreCase(document.mime_type)
-                ) {
+                if ("application/x-mpegurl".equalsIgnoreCase(document.mime_type)) {
                     continue;
                 }
                 VideoUri q = VideoUri.of(currentAccount, document, manifests.get(document.id), reference, useFileDatabaseQueue);
@@ -1454,11 +1450,9 @@ public class VideoPlayer implements Player.Listener, VideoListener, AnalyticsLis
     }
 
     public void setPlaybackSpeed(float speed) {
-        try {
-            if (player != null) {
-                player.setPlaybackParameters(new PlaybackParameters(speed, speed > 1.0f ? 0.98f : 1.0f));
-            }
-        } catch (Exception ignore) {}
+        if (player != null) {
+            player.setPlaybackParameters(new PlaybackParameters(speed, speed > 1.0f ? 0.98f : 1.0f));
+        }
     }
 
     public float getPlaybackSpeed() {

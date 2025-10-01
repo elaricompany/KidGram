@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import org.elarikg.messenger.R;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLitePreparedStatement;

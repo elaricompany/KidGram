@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.RemoteViews;
 
+import org.elarikg.messenger.R;
 import org.telegram.ui.LaunchActivity;
 
 public class FeedWidgetProvider extends AppWidgetProvider {

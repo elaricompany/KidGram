@@ -147,7 +147,7 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
                             }
                         }
                     } else if (inlineResult.photo != null) {
-                        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(inlineResult.photo.sizes, AndroidUtilities.getPhotoSize());
+                        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(inlineResult.photo.sizes, AndroidUtilities.photoSize);
                         if (photoSize != null) {
                             size.width = photoSize.w;
                             size.height = photoSize.h;

@@ -194,6 +194,14 @@
         <item name="widgetPreviewImage">@drawable/widget_avatar_7</item>
     </style>
 
+    <style name="Theme.TMessages.AppWidget.Preview3">
+        <item name="widgetPreviewTitle">Dolph Ingman</item>
+        <item name="widgetPreviewContent">&#128517; Sticker</item>
+        <item name="widgetPreviewTime">11:00</item>
+        <item name="widgetPreviewDot">2</item>
+        <item name="widgetPreviewImage">@drawable/widget_avatar_6</item>
+    </style>
+
     <style name="Theme.TMessages.AppWidget.Preview4">
         <item name="widgetPreviewTitle">Doge</item>
         <item name="widgetPreviewDot">0</item>
@@ -245,5 +253,327 @@
     <style name="TMessages.AppWidget.Badge" parent="Base.TMessages.AppWidget.Badge">
         <item name="android:textColor">@color/widget_badge</item>
     </style>
+
+
+
+    <style name="header_lvl_1_black">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="header_lvl_1_white">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+    <style name="header_instruction_lvl_1_white">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/hello_fragment_text_1_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textFontWeight">700</item>
+    </style>
+
+    <style name="header_lvl_2_black">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
+
+    </style>
+    <style name="header_lvl_2_white">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="header_instruction_lvl_2_white">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/hello_fragment_text_2_size</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+    <style name="header_instruction_lvl_2_white_bold">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/hello_fragment_text_2_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+
+    <style name="text_h1_black">
+        <item name="android:lineSpacingMultiplier">1.00</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black_2</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="text_h2_black">
+        <item name="android:lineSpacingMultiplier">1.00</item>
+        <item name="android:textColor">@color/black_2</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="text_h3_black">
+        <item name="android:lineSpacingMultiplier">1.00</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black_2</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="text_h4_black">
+        <item name="android:lineSpacingMultiplier">1.00</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black_2</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="text_body1_black">
+        <item name="android:lineSpacingMultiplier">1.00</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black_2</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!--Кнопки-->
+    <style name="btnSimpleEnable">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_enable_back</item>
+    </style>
+
+    <style name="btnSimpleDisable">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_disable_back</item>
+    </style>
+
+    <!--Кнопки-->
+    <style name="btnSimpleWhiteEnable">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColorHint">@color/black</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_white_enable_back</item>
+    </style>
+
+    <style name="btnSimpleEnableDark">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_enable_back_dark</item>
+    </style>
+
+    <style name="btnSimplePositive">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_positive_back</item>
+    </style>
+    <style name="btnSimpleNegative">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">43dp</item>
+        <item name="android:paddingRight">43dp</item>
+        <item name="android:background">@drawable/btn_simple_negative_back</item>
+    </style>
+
+    <style name="btnSimpleEnable2">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:background">@drawable/btn_simple_enable_void_back</item>
+    </style>
+
+    <style name="btnStartFragmentsSimpleEnable">
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:background">@drawable/btn_start_fragments_simple_enable</item>
+    </style>
+
+    <style name="btnStartFragmentsSimpleEnableInvers">
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/hello_fragment_main_color</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorHint">@color/hello_fragment_main_color</item>
+        <item name="android:background">@drawable/btn_start_fragments_simple_enable_invers</item>
+    </style>
+
+    <style name="btnStartFragmentsSimpleDisable">
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="android:background">@drawable/btn_start_fragments_simple_disable</item>
+    </style>
+
+    <style name="btnKeybordBtn">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="android:background">@drawable/btn_start_fragments_simple_disable</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">18dp</item>
+        <item name="android:paddingBottom">18dp</item>
+    </style>
+
+    <style name="btnStartFragmentsNegativ">
+        <item name="android:layout_gravity">left</item>
+        <item name="android:textColor">@color/hello_fragment_main_color</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="btnNewKidGramBlue">
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/kg_blue_3</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="btnNewKidGramBlueBackgound">
+        <item name="android:background">@drawable/btn_kidgram_new_back</item>
+
+        <item name="android:paddingTop">@dimen/default_padding</item>
+        <item name="android:paddingBottom">@dimen/default_padding</item>
+        <item name="android:paddingStart">@dimen/default_padding</item>
+        <item name="android:paddingEnd">@dimen/default_padding</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="btnNewKidGramRed">
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/kg_red</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!--EditText-->
+    <style name="etSimpleEnable">
+        <item name="android:background">@drawable/edit_text_background</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="text_member">
+        <item name="android:textColor">@color/grey2</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+    <style name="invisible_edittext">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="new_hello_fragment_text_h1">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="new_hello_fragment_text_t1">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="new_hello_fragment_text_t2">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#7A7A7A</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="new_hello_fragment_text_link">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/hello_fragment_main_color</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="new_hello_fragment_text_t3">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/hello_fragment_main_color</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+
+    <style name="new_hello_fragment_checkcode_digit">
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="new_hello_fragment_et_simple_enable">
+        <item name="android:background">@drawable/edit_text_background_white</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+
 
 </resources>

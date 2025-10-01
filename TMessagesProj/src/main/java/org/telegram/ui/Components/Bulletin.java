@@ -2,7 +2,6 @@ package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
-import static org.telegram.messenger.Utilities.dist;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -16,7 +15,6 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
@@ -37,7 +35,6 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -68,7 +65,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.SparseLongArray;
 import org.telegram.tgnet.TLRPC;
@@ -263,7 +260,6 @@ public class Bulletin {
         return this;
     }
 
-    public boolean setCanHideOnShow = true;
     public Bulletin show(boolean top) {
         if (!showing && containerLayout != null) {
             showing = true;
@@ -335,7 +331,7 @@ public class Bulletin {
                             layoutTransition.animateEnter(layout, layout::onEnterTransitionStart, () -> {
                                 layout.transitionRunningEnter = false;
                                 layout.onEnterTransitionEnd();
-                                if (setCanHideOnShow) setCanHide(true);
+                                setCanHide(true);
                             }, offset -> {
                                 if (currentDelegate != null && !top) {
                                     currentDelegate.onBottomOffsetChange(layout.getHeight() - offset);
@@ -348,7 +344,7 @@ public class Bulletin {
                             updatePosition();
                             layout.onEnterTransitionStart();
                             layout.onEnterTransitionEnd();
-                            if (setCanHideOnShow) setCanHide(true);
+                            setCanHide(true);
                         }
                     }
                 }
@@ -519,12 +515,8 @@ public class Bulletin {
         private final Rect rect = new Rect();
         private final GestureDetector gestureDetector;
 
-        private boolean wasCanHide;
-        private long pressedTime;
         private boolean pressed;
         private float translationX;
-        private float tx, ty;
-        private boolean scrolling;
         private boolean hideAnimationRunning;
         private boolean needLeftAlphaAnimation;
         private boolean needRightAlphaAnimation;
@@ -546,12 +538,6 @@ public class Bulletin {
 
                 @Override
                 public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                    tx += distanceX;
-                    ty += distanceY;
-                    if (dist(0, 0, tx, ty) > AndroidUtilities.touchSlop)
-                        scrolling = true;
-                    if (!wasCanHide)
-                        return false;
                     layout.setTranslationX(translationX -= distanceX);
                     if (translationX == 0 || (translationX < 0f && needLeftAlphaAnimation) || (translationX > 0f && needRightAlphaAnimation)) {
                         layout.setAlpha(1f - Math.abs(translationX) / layout.getWidth());
@@ -610,19 +596,11 @@ public class Bulletin {
                 if (actionMasked == MotionEvent.ACTION_DOWN) {
                     if (!pressed && !hideAnimationRunning) {
                         layout.animate().cancel();
-                        tx = ty = 0;
-                        scrolling = false;
                         translationX = layout.getTranslationX();
-                        pressedTime = System.currentTimeMillis();
-                        wasCanHide = layout.bulletin == null || layout.bulletin.canHide;
                         onPressedStateChanged(pressed = true);
-                        if (layout.onClickListener != null) {
-                            layout.setPressed(true);
-                        }
                     }
                 } else if (actionMasked == MotionEvent.ACTION_UP || actionMasked == MotionEvent.ACTION_CANCEL) {
                     if (pressed) {
-                        boolean hidden = false;
                         if (!hideAnimationRunning) {
                             if (Math.abs(translationX) > layout.getWidth() / 3f) {
                                 final float tx = Math.signum(translationX) * layout.getWidth();
@@ -632,18 +610,11 @@ public class Bulletin {
                                         onHide();
                                     }
                                 }).start();
-                                hidden = true;
                             } else {
                                 layout.animate().translationX(0).alpha(1f).setDuration(200).start();
                             }
                         }
-                        if (!hidden && actionMasked == MotionEvent.ACTION_UP && layout.isPressed() && layout.onClickListener != null && !scrolling) {
-                            layout.onClickListener.onClick(layout);
-                        }
                         onPressedStateChanged(pressed = false);
-                        if (layout.onClickListener != null) {
-                            layout.setPressed(false);
-                        }
                     }
                 }
                 return true;
@@ -745,12 +716,6 @@ public class Bulletin {
 
         public boolean isTransitionRunning() {
             return transitionRunningEnter || transitionRunningExit;
-        }
-
-        public OnClickListener onClickListener;
-        @Override
-        public void setOnClickListener(@Nullable OnClickListener l) {
-            this.onClickListener = l;
         }
 
         @WidthDef
@@ -1427,107 +1392,6 @@ public class Bulletin {
             titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             titleTextView.setTypeface(AndroidUtilities.bold());
             linearLayout.addView(titleTextView);
-
-            subtitleTextView = new LinkSpanDrawable.LinksTextView(context);
-            subtitleTextView.setPadding(dp(4), 0, dp(4), 0);
-            subtitleTextView.setTextColor(undoInfoColor);
-            subtitleTextView.setLinkTextColor(undoLinkColor);
-            subtitleTextView.setTypeface(Typeface.SANS_SERIF);
-            subtitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
-            linearLayout.addView(subtitleTextView);
-        }
-
-        @Override
-        protected void onShow() {
-            super.onShow();
-            imageView.playAnimation();
-        }
-
-        public void setAnimation(int resId, String... layers) {
-            setAnimation(resId, 32, 32, layers);
-        }
-
-        public void setAnimation(int resId, int w, int h, String... layers) {
-            imageView.setAnimation(resId, w, h);
-            for (String layer : layers) {
-                imageView.setLayerColor(layer + ".**", textColor);
-            }
-        }
-
-        public void setAnimation(TLRPC.Document document, int w, int h, String... layers) {
-            imageView.setAutoRepeat(true);
-            imageView.setAnimation(document, w, h);
-            for (String layer : layers) {
-                imageView.setLayerColor(layer + ".**", textColor);
-            }
-        }
-
-        public CharSequence getAccessibilityText() {
-            return titleTextView.getText() + ".\n" + subtitleTextView.getText();
-        }
-
-        public void hideImage() {
-            imageView.setVisibility(GONE);
-            ((MarginLayoutParams) linearLayout.getLayoutParams()).setMarginStart(dp(10));
-        }
-    }
-
-    public static class ProgressTwoLineAnimatedTitleLottieLayout extends ButtonLayout {
-
-        public final RLottieImageView imageView;
-        public final AnimatedTextView titleTextView;
-        public final LinkSpanDrawable.LinksTextView subtitleTextView;
-        private final LinearLayout linearLayout;
-
-        private float progress;
-        private final View progressView;
-
-        private final int textColor;
-
-        public void setProgress(float progress) {
-            this.progress = progress;
-            progressView.invalidate();
-        }
-
-        public ProgressTwoLineAnimatedTitleLottieLayout(@NonNull Context context, Theme.ResourcesProvider resourcesProvider) {
-            super(context, resourcesProvider);
-            this.textColor = getThemedColor(Theme.key_undo_infoColor);
-            setBackground(getThemedColor(Theme.key_undo_background));
-
-            imageView = new RLottieImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.CENTER);
-            addView(imageView, LayoutHelper.createFrameRelatively(56, 48, Gravity.START | Gravity.CENTER_VERTICAL));
-
-            final int undoInfoColor = getThemedColor(Theme.key_undo_infoColor);
-            final int undoLinkColor = getThemedColor(Theme.key_undo_cancelColor);
-
-            linearLayout = new LinearLayout(context);
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-            addView(linearLayout, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL, 52, 8, 8, 10));
-
-            progressView = new View(context) {
-                private final AnimatedFloat animatedProgress = new AnimatedFloat(this, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
-                private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                private final Path clipPath = new Path();
-                @Override
-                protected void onDraw(@NonNull Canvas canvas) {
-                    canvas.save();
-                    clipPath.rewind();
-                    clipPath.addRoundRect(0, -dp(20), getWidth(), getHeight(), dp(10), dp(10), Path.Direction.CW);
-                    canvas.clipPath(clipPath);
-                    paint.setColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
-                    canvas.drawRect(0, 0, getWidth() * animatedProgress.set(progress), getHeight(), paint);
-                    canvas.restore();
-                }
-            };
-            addView(progressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 2, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
-
-            titleTextView = new AnimatedTextView(context, true, true, true);
-            titleTextView.setPadding(dp(4), 0, dp(4), 0);
-            titleTextView.setTextColor(undoInfoColor);
-            titleTextView.setTextSize(dp(14));
-            titleTextView.setTypeface(AndroidUtilities.bold());
-            linearLayout.addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 20));
 
             subtitleTextView = new LinkSpanDrawable.LinksTextView(context);
             subtitleTextView.setPadding(dp(4), 0, dp(4), 0);

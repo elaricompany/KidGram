@@ -34,6 +34,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.DialogObject;
@@ -42,7 +46,7 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -448,7 +452,10 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         for (int i = 0; i < allStories.size(); i++) {
             long dialogId = DialogObject.getPeerDialogId(allStories.get(i).peer);
             if (dialogId != UserConfig.getInstance(currentAccount).getClientUserId()) {
-                items.add(new Item(dialogId));
+//                int acces = ElariUtils.getAccess(dialogId);
+//                if(acces == C.ACCESS_ALLOWED) {
+                    items.add(new Item(dialogId));
+                //}
             }
         }
         int size = items.size();
@@ -889,7 +896,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
     public void openStoryRecorder(long dialogId) {
         if (dialogId == 0) {
             final StoriesController.StoryLimit storyLimit = MessagesController.getInstance(currentAccount).getStoriesController().checkStoryLimit();
-            if (storyLimit != null && storyLimit.active(currentAccount)) {
+            if (storyLimit != null) {
                 fragment.showDialog(new LimitReachedBottomSheet(fragment, getContext(), storyLimit.getLimitReachedType(), currentAccount, null));
                 return;
             }
@@ -1033,13 +1040,25 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position_) {
+            int position = holder.getAdapterPosition();
             StoryCell cell = (StoryCell) holder.itemView;
             cell.position = position;
+            int access = C.ACCESS_WAIT;
             if (mini) {
                 cell.setDialogId(miniItems.get(position).dialogId);
+                access = ElariUtils.getAccess(miniItems.get(position).dialogId);
             } else {
                 cell.setDialogId(items.get(position).dialogId);
+                access = ElariUtils.getAccess(items.get(position).dialogId);
+            }
+
+            if(access == C.ACCESS_ALLOWED){
+                //cell.setVisibility(VISIBLE);
+                cell.setClickable(false);
+            }else{
+                //cell.setVisibility(GONE);
+                cell.setClickable(true);
             }
         }
 
@@ -1135,6 +1154,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         private float overscrollProgress;
         private boolean selectedForOverscroll;
         boolean progressWasDrawn;
+        int access = C.ACCESS_WAIT;
 
         private final AnimatedFloat failT = new AnimatedFloat(this, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
 
@@ -1171,6 +1191,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         }
 
         public void setDialogId(long dialogId) {
+            access = ElariUtils.getAccess(dialogId);
             boolean animated = this.dialogId == dialogId;
             if (!animated) {
                 if (cancellable != null) {
@@ -1361,7 +1382,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
                     for (int i = 0; i < uploadingOrEditingStories.size(); i++) {
                         uploadingProgress += uploadingOrEditingStories.get(i).progress;
                     }
-                    uploadingProgress = (storiesController.uploadedStories + uploadingProgress) / (storiesController.uploadedStories + uploadingOrEditingStories.size());
+                    uploadingProgress = uploadingProgress / uploadingOrEditingStories.size();
                     lastUploadingCloseFriends = closeFriends = uploadingOrEditingStories.get(uploadingOrEditingStories.size() - 1).isCloseFriends();
                 }
                 invalidate();
@@ -1433,11 +1454,19 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
                     } else {
                         params.crossfadeToDialog = 0;
                     }
+
+
                     if (isSelf) {
                         StoriesUtilities.drawAvatarWithStory(dialogId, canvas, avatarImage, storiesController.hasSelfStories(), params);
                     } else {
-                        StoriesUtilities.drawAvatarWithStory(dialogId, canvas, avatarImage, storiesController.hasStories(dialogId), params);
+                        if(access != C.ACCESS_ALLOWED){
+                            StoriesUtilities.drawAvatarWithStory(dialogId, canvas, avatarImage, storiesController.hasStories(dialogId), params);
+                            avatarImage.setImageBitmap(getContext().getDrawable(R.drawable.blur));
+                        }else {
+                            StoriesUtilities.drawAvatarWithStory(dialogId, canvas, avatarImage, storiesController.hasStories(dialogId), params);
+                        }
                     }
+
 
 
                     if (failT > 0) {

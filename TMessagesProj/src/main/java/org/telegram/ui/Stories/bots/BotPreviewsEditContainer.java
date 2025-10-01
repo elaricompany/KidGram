@@ -42,7 +42,7 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.Utilities;
@@ -70,7 +70,6 @@ import org.telegram.ui.Components.StickerEmptyView;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
-import org.telegram.ui.Components.UniversalRecyclerView;
 import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stories.StoriesController;
@@ -196,7 +195,7 @@ public class BotPreviewsEditContainer extends FrameLayout implements Notificatio
             }
             private String lastLang;
             @Override
-            public void onTabAnimationUpdate(boolean manual) {
+            protected void onTabAnimationUpdate(boolean manual) {
                 String lang = getCurrentLang();
                 if (!TextUtils.equals(lastLang, lang)) {
                     lastLang = lang;
@@ -1979,7 +1978,7 @@ public class BotPreviewsEditContainer extends FrameLayout implements Notificatio
                     return new LanguageView(context);
                 }
                 @Override
-                public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
+                public void bindView(View view, UItem item, boolean divider) {
                     ((LanguageView) view).set((TranslateController.Language) item.object, divider);
                 }
                 public static UItem of(TranslateController.Language l) {

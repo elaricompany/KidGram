@@ -2,7 +2,6 @@ package org.telegram.ui.Gifts;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
-import static org.telegram.messenger.LocaleController.formatPluralStringComma;
 import static org.telegram.messenger.LocaleController.formatSpannable;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
@@ -39,7 +38,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -532,12 +531,6 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
         }
     }
 
-    protected BulletinFactory getParentBulletinFactory() {
-        final BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
-        if (lastFragment == null) return null;
-        return BulletinFactory.of(lastFragment);
-    }
-
     private final ColoredImageSpan[] cachedStarSpan = new ColoredImageSpan[1];
 
     private TLRPC.TL_textWithEntities getMessage() {
@@ -574,15 +567,6 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
                     AndroidUtilities.hideKeyboard(messageEdit);
                     dismiss();
                     StarsController.getInstance(currentAccount).makeStarGiftSoldOut(starGift);
-                    return;
-                } else if ("STARGIFT_USER_USAGE_LIMITED".equalsIgnoreCase(err)) {
-                    AndroidUtilities.hideKeyboard(messageEdit);
-                    dismiss();
-                    BulletinFactory bulletinFactory = getParentBulletinFactory();
-                    if (bulletinFactory == null || starGift == null || !starGift.limited_per_user) return;
-                    bulletinFactory
-                        .createSimpleMultiBulletin(starGift.getDocument(), AndroidUtilities.replaceTags(formatPluralStringComma("Gift2PerUserLimit", starGift.per_user_total)))
-                        .show();
                     return;
                 }
                 button.setLoading(false);

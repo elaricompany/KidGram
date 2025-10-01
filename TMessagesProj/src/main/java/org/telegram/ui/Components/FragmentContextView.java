@@ -65,7 +65,7 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -109,7 +109,8 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
             STYLE_INACTIVE_GROUP_CALL,
             STYLE_IMPORTING_MESSAGES
     })
-    public @interface Style {}
+    public @interface Style {
+    }
 
     private ImageView playButton;
     private PlayPauseDrawable playPauseDrawable;
@@ -159,7 +160,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
 
     private boolean notifyButtonEnabled;
     private boolean willBeNotified;
-    private final AnimatedTextView.AnimatedTextDrawable notifyText = new AnimatedTextView.AnimatedTextDrawable(false, true, true);
+    private AnimatedTextView.AnimatedTextDrawable notifyText = new AnimatedTextView.AnimatedTextDrawable(false, true, true);
     private ButtonBounce notifyButtonBounce;
 
     private boolean scheduleRunnableScheduled;
@@ -196,7 +197,6 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
 
     private FragmentContextViewDelegate delegate;
     private final Theme.ResourcesProvider resourcesProvider;
-    private final boolean isSideMenued;
 
     private boolean firstLocationsLoaded;
     private int lastLocationSharingCount = -1;
@@ -254,13 +254,8 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
     }
 
     public FragmentContextView(Context context, BaseFragment parentFragment, View paddingView, boolean location, Theme.ResourcesProvider resourcesProvider) {
-        this(context, parentFragment, paddingView, location, resourcesProvider, false);
-    }
-
-    public FragmentContextView(Context context, BaseFragment parentFragment, View paddingView, boolean location, Theme.ResourcesProvider resourcesProvider, boolean isSideMenued) {
         super(context);
         this.resourcesProvider = resourcesProvider;
-        this.isSideMenued = isSideMenued;
 
         fragment = parentFragment;
         if (parentFragment instanceof ChatActivityInterface) {
@@ -444,7 +439,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 return textView;
             }
         };
-        addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, 36 + (isSideMenued ? 64 : 0), 0));
+        addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, 36, 0));
 
         subtitleTextView = new AudioPlayerAlert.ClippingTextViewSwitcher(context) {
             @Override
@@ -460,7 +455,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 return textView;
             }
         };
-        addView(subtitleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 10, 36 + (isSideMenued ? 64 : 0), 0));
+        addView(subtitleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 10, 36, 0));
 
         joinButtonFlicker = new CellFlickerDrawable();
         joinButtonFlicker.setProgress(1);
@@ -806,8 +801,6 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 checkImport(false);
             }
         });
-
-        setLeftMargin(leftMargin);
     }
 
     private boolean slidingSpeed;
@@ -927,7 +920,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 }
             };
             speedHintView.setExtraTranslationY(dp(-12));
-            speedHintView.setText(getString(R.string.SpeedHint));
+            speedHintView.setText(getString("SpeedHint"));
             MarginLayoutParams params = new MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.rightMargin = dp(3);
             ((ViewGroup) getParent()).addView(speedHintView, params);
@@ -1147,7 +1140,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 playbackSpeedButton.setVisibility(GONE);
                 playbackSpeedButton.setTag(null);
             }
-            titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, (isSideMenued ? 64 : 0) + 36, 0));
+            titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, 36, 0));
         } else if (style == STYLE_AUDIO_PLAYER || style == STYLE_LIVE_LOCATION) {
             selector.setBackground(Theme.getSelectorDrawable(false));
             frameLayout.setBackgroundColor(getThemedColor(Theme.key_inappPlayerBackground));
@@ -1174,7 +1167,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
             titleTextView.setTag(Theme.key_inappPlayerTitle);
             if (style == STYLE_AUDIO_PLAYER) {
                 playButton.setLayoutParams(LayoutHelper.createFrame(36, 36, Gravity.TOP | Gravity.LEFT, 0, 0, 0, 0));
-                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, (isSideMenued ? 64 : 0) + 36, 0));
+                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35, 0, 36, 0));
                 createPlaybackSpeedButton();
                 if (playbackSpeedButton != null) {
                     playbackSpeedButton.setVisibility(VISIBLE);
@@ -1183,7 +1176,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 closeButton.setContentDescription(getString(R.string.AccDescrClosePlayer));
             } else {
                 playButton.setLayoutParams(LayoutHelper.createFrame(36, 36, Gravity.TOP | Gravity.LEFT, 8, 0, 0, 0));
-                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35 + 16, 0, (isSideMenued ? 64 : 0) + 36, 0));
+                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 35 + 16, 0, 36, 0));
                 closeButton.setContentDescription(getString(R.string.AccDescrStopLiveLocation));
             }
         } else if (style == STYLE_INACTIVE_GROUP_CALL) {
@@ -1274,7 +1267,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
             subtitleTextView.setVisibility(GONE);
             joinButton.setVisibility(GONE);
 
-            titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 0, 0, (isSideMenued ? 64 : 0) + 0, 2));
+            titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 0, 0, 0, 2));
             titleTextView.setPadding(dp(88), 0, dp(88) + joinButtonWidth, 0);
             if (playbackSpeedButton != null) {
                 playbackSpeedButton.setVisibility(GONE);
@@ -2345,8 +2338,8 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                     titleTextView.setTranslationX(0);
                     subtitleTextView.setTranslationX(0);
                 }
-                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 20, Gravity.LEFT | Gravity.TOP, x, 5, (isSideMenued ? 64 : 0) + (call.isScheduled() ? 90 : 36), 0));
-                subtitleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 20, Gravity.LEFT | Gravity.TOP, x, 25, (isSideMenued ? 64 : 0) + (call.isScheduled() ? 90 : 36), 0));
+                titleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 20, Gravity.LEFT | Gravity.TOP, x, 5, call.isScheduled() ? 90 : 36, 0));
+                subtitleTextView.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 20, Gravity.LEFT | Gravity.TOP, x, 25, call.isScheduled() ? 90 : 36, 0));
             }
         } else {
             avatars.updateAfterTransitionEnd();
@@ -2545,28 +2538,5 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
         updateScheduleTimeRunnable.run();
 
         BulletinFactory.of(fragment).createSimpleBulletin(willBeNotified ? R.raw.silent_unmute : R.raw.silent_mute, getString(willBeNotified ? R.string.LiveStreamWillNotify : R.string.LiveStreamWillNotNotify)).show();
-    }
-
-    private float leftMargin;
-    public void setLeftMargin(float leftMargin) {
-        if (frameLayout == null) {
-            this.leftMargin = leftMargin;
-        } else {
-            if (playButton != null) {
-                playButton.setTranslationX(leftMargin);
-            }
-            if (importingImageView != null) {
-                importingImageView.setTranslationX(leftMargin);
-            }
-            if (titleTextView != null) {
-                titleTextView.setTranslationX(leftMargin);
-            }
-            if (subtitleTextView != null) {
-                subtitleTextView.setTranslationX(leftMargin);
-            }
-            if (avatars != null) {
-                avatars.setTranslationX(leftMargin);
-            }
-        }
     }
 }

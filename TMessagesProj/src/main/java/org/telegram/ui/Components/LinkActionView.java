@@ -36,7 +36,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -144,7 +144,6 @@ public class LinkActionView extends LinearLayout {
         removeView.setTypeface(AndroidUtilities.bold());
         removeView.setSingleLine(true);
         linearLayout.addView(removeView, LayoutHelper.createLinear(0, 42, 1f, containerPadding, 0, containerPadding, 0));
-        linearLayout.setClickable(true);
         removeView.setVisibility(View.GONE);
 
         addView(linearLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 12, 0, 0));

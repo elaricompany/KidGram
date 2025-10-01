@@ -1,8 +1,5 @@
 package org.telegram.messenger;
 
-import static org.telegram.messenger.MessagesController.findUpdates;
-import static org.telegram.messenger.MessagesController.findUpdatesAndRemove;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -20,12 +17,14 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 
 import org.checkerframework.checker.units.qual.A;
@@ -33,9 +32,6 @@ import org.telegram.messenger.utils.BillingUtilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.LaunchActivity;
-import org.telegram.ui.LoginActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stars.StarsController;
 
@@ -81,8 +77,13 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
     }
 
     private BillingController(Context ctx) {
+
+        PendingPurchasesParams pendingPurchasesParams = PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build();
+
         billingClient = BillingClient.newBuilder(ctx)
-                .enablePendingPurchases()
+                .enablePendingPurchases(pendingPurchasesParams)
                 .setListener(this)
                 .build();
     }
@@ -108,7 +109,6 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
     }
 
     private static NumberFormat currencyInstance;
-    private static NumberFormat currencyInstanceRounded;
     public String formatCurrency(long amount, String currency, int exp, boolean rounded) {
         if (currency == null || currency.isEmpty()) {
             return String.valueOf(amount);
@@ -126,13 +126,8 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
             }
             currencyInstance.setCurrency(cur);
             if (rounded) {
-                currencyInstance.setMaximumFractionDigits(0);
-                currencyInstance.setMinimumFractionDigits(0);
                 return currencyInstance.format(Math.round(amount / Math.pow(10, exp)));
             }
-            final int defaultFractionDigits = cur.getDefaultFractionDigits();
-            currencyInstance.setMinimumFractionDigits(defaultFractionDigits);
-            currencyInstance.setMaximumFractionDigits(defaultFractionDigits);
             return currencyInstance.format(amount / Math.pow(10, exp));
         }
         return amount + " " + currency;
@@ -371,22 +366,6 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
                             if (response instanceof TLRPC.Updates) {
                                 FileLog.d("BillingController.onPurchasesUpdatedInternal: " + purchase.getOrderId() + " purchase is purchased and now assigned");
 
-                                if (req.purpose instanceof TLRPC.TL_inputStorePaymentAuthCode) {
-                                    for (TLRPC.TL_updateSentPhoneCode u : findUpdatesAndRemove((TLRPC.Updates) response, TLRPC.TL_updateSentPhoneCode.class)) {
-                                        AndroidUtilities.runOnUIThread(() -> {
-                                            LoginActivity fragment = LaunchActivity.findFragment(LoginActivity.class);
-                                            if (fragment == null) {
-                                                fragment = new LoginActivity(acc.getCurrentAccount());
-                                                BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
-                                                if (lastFragment != null) {
-                                                    lastFragment.presentFragment(fragment);
-                                                }
-                                            }
-                                            fragment.open(((TLRPC.TL_inputStorePaymentAuthCode) req.purpose).phone_number, u.sent_code);
-                                        });
-                                    }
-                                }
-
                                 acc.getMessagesController().processUpdates((TLRPC.Updates) response, false);
 
                                 for (String productId : purchase.getProducts()) {
@@ -515,7 +494,8 @@ public class BillingController implements PurchasesUpdatedListener, BillingClien
         }
     }
 
-    private void onQueriedPremiumProductDetails(BillingResult billingResult, List<ProductDetails> list) {
+    private void onQueriedPremiumProductDetails(BillingResult billingResult, QueryProductDetailsResult tmp) {
+        List<ProductDetails> list = tmp.getProductDetailsList();
         FileLog.d("Billing: Query product details finished " + billingResult + ", " + list);
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
             for (ProductDetails details : list) {

@@ -48,7 +48,7 @@ import org.telegram.messenger.LruCache;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
@@ -594,7 +594,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
         viewPagerFixed = new ViewPagerFixed(getContext()) {
             @Override
-            public void onTabAnimationUpdate(boolean manual) {
+            protected void onTabAnimationUpdate(boolean manual) {
                 if (manual) {
                     return;
                 }

@@ -37,7 +37,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLObject;
@@ -348,10 +348,6 @@ public class SessionCell extends FrameLayout {
             iconId = R.drawable.fragment;
             colorKey = -1;
             colorKey2 = -1;
-        } else if (platform.equalsIgnoreCase("search")) {
-            iconId = R.drawable.msg_search;
-            colorKey = Theme.key_avatar_backgroundBlue;
-            colorKey2 = Theme.key_avatar_background2Blue;
         } else if (platform.contains("anonymous")) {
             iconId = R.drawable.large_hidden;
             colorKey = Theme.key_avatar_backgroundBlue;

@@ -58,7 +58,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
@@ -1124,11 +1124,12 @@ public class TwoStepVerificationSetupActivity extends BaseFragment {
                 bottomSkipButton.setOnClickListener(v -> {
                     TL_account.resendPasswordEmail req = new TL_account.resendPasswordEmail();
                     ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {});
-                    showDialog(new AlertDialog.Builder(getParentActivity())
-                            .setMessage(LocaleController.getString(R.string.ResendCodeInfo))
-                            .setTitle(LocaleController.getString(R.string.TwoStepVerificationTitle))
-                            .setPositiveButton(LocaleController.getString(R.string.OK), null)
-                            .create());
+                    //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                    showDialog(new AlertDialog.Builder(getParentActivity())
+//                            .setMessage(LocaleController.getString(R.string.ResendCodeInfo))
+//                            .setTitle(LocaleController.getString(R.string.TwoStepVerificationTitle))
+//                            .setPositiveButton(LocaleController.getString(R.string.OK), null)
+//                            .create());
                 });
 
                 codeFieldContainer.setVisibility(View.VISIBLE);

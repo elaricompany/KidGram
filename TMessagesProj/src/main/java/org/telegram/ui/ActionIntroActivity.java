@@ -42,7 +42,7 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.LocationController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -670,20 +670,21 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 processOpenQrReader();
             } else {
-                new AlertDialog.Builder(getParentActivity())
-                        .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(R.string.QRCodePermissionNoCameraWithHint)))
-                        .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
-                            try {
-                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
-                                getParentActivity().startActivity(intent);
-                            } catch (Exception e) {
-                                FileLog.e(e);
-                            }
-                        })
-                        .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
-                        .setTopAnimation(R.raw.permission_request_camera, 72, false, Theme.getColor(Theme.key_dialogTopBackground))
-                        .show();
+                //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                new AlertDialog.Builder(getParentActivity())
+//                        .setMessage(AndroidUtilities.replaceTags(LocaleController.getString(R.string.QRCodePermissionNoCameraWithHint)))
+//                        .setPositiveButton(LocaleController.getString(R.string.PermissionOpenSettings), (dialogInterface, i) -> {
+//                            try {
+//                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                                intent.setData(Uri.parse("package:" + ApplicationLoader.applicationContext.getPackageName()));
+//                                getParentActivity().startActivity(intent);
+//                            } catch (Exception e) {
+//                                FileLog.e(e);
+//                            }
+//                        })
+//                        .setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
+//                        .setTopAnimation(R.raw.permission_request_camera, 72, false, Theme.getColor(Theme.key_dialogTopBackground))
+//                        .show();
             }
         }
     }

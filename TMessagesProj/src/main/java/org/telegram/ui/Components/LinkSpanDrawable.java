@@ -32,7 +32,7 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LiteMode;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -767,10 +767,6 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
             Spanned spanned = (Spanned) text;
             ClickableSpan[] spans = spanned.getSpans(0, spanned.length(), ClickableSpan.class);
             return spans != null && spans.length > 0;
-        }
-
-        public void clear() {
-            links.clear(false);
         }
     }
 

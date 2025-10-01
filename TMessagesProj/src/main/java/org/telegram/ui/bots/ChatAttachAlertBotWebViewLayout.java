@@ -41,7 +41,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.browser.Browser;
@@ -76,7 +76,6 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     private long queryId;
     private boolean silent;
     private int replyToMsgId;
-    private long monoforumTopicId;
     private int currentAccount;
     private String startCommand;
 
@@ -109,14 +108,6 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
             prolongWebView.silent = silent;
             if (replyToMsgId != 0) {
                 prolongWebView.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
-                if (monoforumTopicId != 0) {
-                    prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
-                    prolongWebView.reply_to.flags |= 32;
-                }
-                prolongWebView.flags |= 1;
-            } else if (monoforumTopicId != 0) {
-                prolongWebView.reply_to = new TLRPC.TL_inputReplyToMonoForum();
-                prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
                 prolongWebView.flags |= 1;
             }
 
@@ -482,16 +473,15 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     }
 
     public void requestWebView(int currentAccount, long peerId, long botId, boolean silent, int replyToMsgId) {
-        requestWebView(currentAccount, peerId, botId, silent, replyToMsgId, null, 0);
+        requestWebView(currentAccount, peerId, botId, silent, replyToMsgId, null);
     }
 
-    public void requestWebView(int currentAccount, long peerId, long botId, boolean silent, int replyToMsgId, String startCommand, long monoforumTopicId) {
+    public void requestWebView(int currentAccount, long peerId, long botId, boolean silent, int replyToMsgId, String startCommand) {
         this.currentAccount = currentAccount;
         this.peerId = peerId;
         this.botId = botId;
         this.silent = silent;
         this.replyToMsgId = replyToMsgId;
-        this.monoforumTopicId = monoforumTopicId;
         this.startCommand = startCommand;
         if (addToHomeScreenItem != null) {
             if (MediaDataController.getInstance(currentAccount).canCreateAttachedMenuBotShortcut(botId)) {
@@ -527,14 +517,6 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
 
         if (replyToMsgId != 0) {
             req.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
-            if (monoforumTopicId != 0) {
-                req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
-                req.reply_to.flags |= 32;
-            }
-            req.flags |= 1;
-        } else if (monoforumTopicId != 0) {
-            req.reply_to = new TLRPC.TL_inputReplyToMonoForum();
-            req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
             req.flags |= 1;
         }
 

@@ -85,7 +85,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
@@ -676,9 +676,6 @@ public class SelectAnimatedEmojiDialog extends FrameLayout implements Notificati
                     }
                     int position = 0;
                     int f = 1 + (isGiftsVisible() ? 1 : 0);
-                    if (!isGiftsVisible()) {
-                        index--;
-                    }
                     if (isGiftsVisible() && index == 1) {
                         position = giftsSectionRow;
                     } else if (type == TYPE_AVATAR_CONSTRUCTOR && index == 0) {
@@ -4106,7 +4103,11 @@ public class SelectAnimatedEmojiDialog extends FrameLayout implements Notificati
         }
 
         if (type != TYPE_EFFECTS && type != TYPE_EXPANDABLE_REACTIONS && type != TYPE_STICKER_SET_EMOJI) {
-            emojiTabs.updateEmojiPacks(packs);
+            if(UserConfig.getInstance(currentAccount).isPremium()){
+                emojiTabs.updateEmojiPacks(packs);
+            }else{
+                emojiTabs.updateEmojiPacks(new ArrayList<>());
+            }
         }
 
         if (animated) {

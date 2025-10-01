@@ -21,7 +21,6 @@ import android.graphics.RectF;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.GestureDetector;
@@ -1338,7 +1337,9 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
                         scope.player = null;
                         return;
                     }
-                    boolean sameUri = TextUtils.equals(lastUri == null ? null : lastUri.toString(), uri == null ? null : uri.toString());
+                    String lastAutority = lastUri == null ? null : lastUri.getAuthority();
+                    String autority = uri == null ? null : uri.getAuthority();
+                    boolean sameUri = Objects.equals(lastAutority, autority);
                     if (!sameUri || playerHolder == null) {
                         lastUri = uri;
                         if (playerHolder != null) {
@@ -2680,19 +2681,15 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
                 if (fragment.getParentActivity() != null) {
                     if (allowScreenshots) {
                         fragment.getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                        AndroidUtilities.logFlagSecure();
                     } else {
                         fragment.getParentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                        AndroidUtilities.logFlagSecure();
                     }
                 }
             } else {
                 if (allowScreenshots) {
                     windowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_SECURE;
-                    AndroidUtilities.logFlagSecure();
                 } else {
                     windowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_SECURE;
-                    AndroidUtilities.logFlagSecure();
                 }
                 try {
                     windowManager.updateViewLayout(windowView, windowLayoutParams);

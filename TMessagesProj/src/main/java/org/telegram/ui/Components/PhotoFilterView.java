@@ -45,7 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.AbstractSerializedData;
@@ -413,12 +413,6 @@ public class PhotoFilterView extends FrameLayout implements FilterShaders.Filter
                     if (eglThread != null) {
                         eglThread.updateUiBlurTransform(transform, getWidth(), getHeight());
                     }
-                }
-
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    final int width = MeasureSpec.getSize(widthMeasureSpec);
-                    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 }
             };
             if (ownLayout) {

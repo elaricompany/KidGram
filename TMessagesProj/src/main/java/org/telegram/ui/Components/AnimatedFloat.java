@@ -157,11 +157,6 @@ public class AnimatedFloat {
             startValue = value;
             transitionStart = SystemClock.elapsedRealtime();
         }
-
-        return getValue();
-    }
-
-    public float getValue() {
         if (transition) {
             final long now = SystemClock.elapsedRealtime();
             final float t = MathUtils.clamp((now - transitionStart - transitionDelay) / (float) transitionDuration, 0, 1);

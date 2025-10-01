@@ -220,9 +220,8 @@ public class HashtagSearchController {
                 request = req;
             } else {
                 TLRPC.TL_channels_searchPosts req = new TLRPC.TL_channels_searchPosts();
-                req.flags |= 1;
-                req.hashtag = query;
                 req.limit = limit;
+                req.hashtag = query;
                 req.offset_peer = new TLRPC.TL_inputPeerEmpty();
                 if (search.lastOffsetPeer != null) {
                     req.offset_rate = search.lastOffsetRate;

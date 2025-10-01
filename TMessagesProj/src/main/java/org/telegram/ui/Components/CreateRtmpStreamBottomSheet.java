@@ -19,7 +19,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_phone;
@@ -161,7 +161,7 @@ public class CreateRtmpStreamBottomSheet extends BottomSheetWithRecyclerListView
         }
 
         @Override
-        public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
+        public void bindView(View view, UItem item, boolean divider) {
             ((TextDetailCell) view).setTextAndValue(item.text, item.textValue, !item.hideDivider);
         }
 

@@ -2,192 +2,233 @@ package org.telegram.messenger.pip;
 
 import android.app.Activity;
 import android.app.PictureInPictureParams;
-import android.app.RemoteAction;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.Log;
+import android.util.Rational;
 import android.view.View;
 
 import androidx.annotation.RequiresApi;
 
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.video.VideoSize;
 
-import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.pip.activity.IPipActivity;
-import org.telegram.messenger.pip.activity.IPipActivityActionListener;
-import org.telegram.messenger.pip.source.IPipSourceDelegate;
-import org.telegram.messenger.pip.source.PipSourceHandlerState2;
-import org.telegram.messenger.pip.utils.PipPositionObserver;
-import org.telegram.messenger.pip.utils.PipSourceParams;
-import org.telegram.messenger.pip.utils.PipUtils;
 import org.webrtc.TextureViewRenderer;
 
-import java.util.ArrayList;
-
 public class PipSource {
+    static final String TAG = "PIP_SOURCE";
+
     private static int sourceIdCounter = 0;
+
     public final int sourceId = sourceIdCounter++;
-
-
-    public final PipActivityController controller;
-    public final PipSourceHandlerState2 state2;
-
     public final String tag;
     public final int priority;
-    public final int cornerRadius;
     public final boolean needMediaSession;
 
-    public final IPipActivityActionListener actionListener;
-    private ArrayList<RemoteAction> remoteActions;
+    private final View.OnLayoutChangeListener onLayoutChangeListener = this::onLayoutChange;
+    private final PictureInPictureContentViewProvider listener;
+    private final Rect position = new Rect();
+    final Point ratio = new Point();
 
-    public final IPipSourceDelegate delegate;
-    public final PipSourceParams params = new PipSourceParams();
-
-    private final PipPositionObserver pipPositionObserver = new PipPositionObserver(this::invalidatePosition);
-
-    public View contentView;
-    public View placeholderView;
+    private boolean isEnabled = true;
+    private View contentView;
+    Activity activity;
     Player player;
 
-    private PipSource(PipActivityController controller, PipSource.Builder builder) {
+    private PipSource(PipSource.Builder builder) {
         this.tag = (builder.tagPrefix != null ? builder.tagPrefix : "pip-source") + "-" + sourceId;
-
-        this.delegate = builder.delegate;
-        this.actionListener = builder.actionListener;
+        this.listener = builder.listener;
+        this.activity = builder.activity;
         this.priority = builder.priority;
-        this.cornerRadius = builder.cornerRadius;
         this.needMediaSession = builder.needMediaSession;
-        this.controller = controller;
-        this.params.setRatio(builder.width, builder.height);
+
+        this.ratio.set(builder.width, builder.height);
         this.player = builder.player;
-        this.placeholderView = builder.placeholderView;
-
-        this.state2 = new PipSourceHandlerState2(this);
-
         setContentView(builder.contentView);
 
-        checkAvailable(false);
-        invalidateActions();
-        controller.dispatchSourceRegister(this);
+        PipNativeApiController.register(this);
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+        PipNativeApiController.onUpdateSourcesMap();
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     public void destroy() {
-        pipPositionObserver.stop();
-        controller.dispatchSourceUnregister(this);
+        detachFromPictureInPicture();
+
+        PipNativeApiController.unregister(this);
+        setContentView(null);
+        activity = null;
     }
 
     public void setContentView(View contentView) {
-        pipPositionObserver.start(contentView);
+        if (this.contentView != null) {
+            this.contentView.removeOnLayoutChangeListener(onLayoutChangeListener);
+        }
 
         this.contentView = contentView;
         if (this.contentView != null) {
+            this.contentView.addOnLayoutChangeListener(onLayoutChangeListener);
             updateContentPosition(this.contentView);
         }
     }
 
-    public void setPlaceholderView(View placeholderView) {
-        this.placeholderView = placeholderView;
-    }
-
     public void setContentRatio(int width, int height) {
-        if (params.setRatio(width, height)) {
-            checkAvailable(true);
-            controller.dispatchSourceParamsChanged(this);
+        final boolean changed = (ratio.x != width || ratio.y != height);
+        ratio.set(width, height);
+        if (player != null && changed) {
+            PipNativeApiController.onUpdateSourcesMap();
+        }
+        if (PipNativeApiController.isMaxPrioritySource(tag) && changed) {
+            applyPictureInPictureParams();
         }
     }
 
     public void setPlayer(Player player) {
         this.player = player;
-        checkAvailable(true);
-        controller.dispatchSourceParamsChanged(this);
+        PipNativeApiController.onUpdateSourcesMap();
+        if (PipNativeApiController.isMaxPrioritySource(tag)) {
+            if (PipNativeApiController.mediaSessionConnector != null) {
+                PipNativeApiController.mediaSessionConnector.setPlayer(player);
+            }
+        }
     }
 
     /* */
 
-    private static final Rect tmpRect = new Rect();
-
+    private static final int[] tmpCords = new int[2];
     private void updateContentPosition(View v) {
-        if (AndroidUtilities.isInPictureInPictureMode(controller.activity)) {
-            return;
+        int x, y;
+        v.getLocationOnScreen(tmpCords);
+        x = tmpCords[0];
+        y = tmpCords[1];
+
+        if (activity != null) {
+            activity.getWindow().getDecorView().getLocationOnScreen(tmpCords);
+            x -= tmpCords[0];
+            y -= tmpCords[1];
         }
 
-        PipUtils.getPipSourceRectHintPosition(controller.activity, v, tmpRect);
-        boolean changed = params.setPosition(tmpRect);
+        final int l = x, t = y, r = x + v.getWidth(), b = y + v.getHeight();
+        boolean changed = position.left != l
+            || position.top != t
+            || position.right != r
+            || position.bottom != b;
+        position.set(l, t, r, b);
 
         if (v instanceof TextureViewRenderer) {
             final int width = ((TextureViewRenderer) v).rotatedFrameWidth;
             final int height = ((TextureViewRenderer) v).rotatedFrameHeight;
-            changed |= params.setRatio(width, height);
+            changed |= (ratio.x != width || ratio.y != height);
+            ratio.set(width, height);
+            if (player != null && changed) {
+                PipNativeApiController.onUpdateSourcesMap();
+            }
         }
 
-        if (changed) {
-            checkAvailable(true);
-            controller.dispatchSourceParamsChanged(this);
-        }
-    }
-
-    public void invalidatePosition() {
-        if (contentView != null) {
-            updateContentPosition(contentView);
+        if (PipNativeApiController.isMaxPrioritySource(tag) && changed) {
+            applyPictureInPictureParams();
         }
     }
 
-    public void invalidateActions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && actionListener != null) {
-            remoteActions = new ArrayList<>();
-            delegate.pipCreateActionsList(remoteActions, tag, controller.activity.getMaxNumPictureInPictureActions());
-            controller.dispatchSourceParamsChanged(this);
+    private void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        updateContentPosition(v);
+    }
+
+    void applyPictureInPictureParams() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !activity.isInPictureInPictureMode()) {
+            // Log.i(TAG, "[UPDATE] setPictureInPictureParams " + tag);
+            activity.setPictureInPictureParams(buildPictureInPictureParams());
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public PictureInPictureParams buildPictureInPictureParams() {
-        PictureInPictureParams.Builder builder = params.build();
-        builder.setActions(remoteActions);
+    PictureInPictureParams buildPictureInPictureParams() {
+        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+        if (ratio.x > 0 && ratio.y > 0) {
+            final Rational r;
+            final float rat = (float) ratio.x / ratio.y;
+            if (rat < 0.45) {
+                r = new Rational(45, 100);
+            } else if (rat > 2.35) {
+                r = new Rational(235, 100);
+            } else {
+                r = new Rational(ratio.x, ratio.y);
+            }
+            builder.setAspectRatio(r);
+        } else {
+            builder.setAspectRatio(null);
+        }
+
+        if (position.width() > 0 && position.height() > 0) {
+            builder.setSourceRectHint(position);
+        } else {
+            builder.setSourceRectHint(null);
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            builder.setAutoEnterEnabled(PipUtils.useAutoEnterInPictureInPictureMode());
-            //builder.setSeamlessResizeEnabled(true);
+            builder.setSeamlessResizeEnabled(true);
+            builder.setAutoEnterEnabled(true);
         }
         return builder.build();
     }
 
     /* */
 
-    private boolean isAvailable;
-    private void checkAvailable(boolean notify) {
-        boolean isAvailable = params.isValid() && delegate.pipIsAvailable();
-        if (this.isAvailable != isAvailable) {
-            this.isAvailable = isAvailable;
-            if (notify) {
-                controller.dispatchSourceAvailabilityChanged(this);
-            }
+    private View attachedToPictureInPictureView;
+
+    public boolean isAttachedToPictureInPicture() {
+        return attachedToPictureInPictureView != null;
+    }
+
+    void attachToPictureInPicture() {
+        detachFromPictureInPicture();
+
+        if (activity instanceof PictureInPictureActivityHandler) {
+            attachedToPictureInPictureView = listener.detachContentFromWindow();
+            ((PictureInPictureActivityHandler) activity).addActivityPipView(attachedToPictureInPictureView);
+            listener.onAttachContentToPip();
+
+            // Log.i(TAG, "[LIFECYCLE] pip attach " + tag);
         }
     }
 
-    public void invalidateAvailability() {
-        checkAvailable(true);
-    }
+    void detachFromPictureInPicture() {
+        if (attachedToPictureInPictureView == null) {
+            return;
+        }
 
-    public boolean isAvailable() {
-        return isAvailable;
+        if (activity instanceof PictureInPictureActivityHandler) {
+            listener.prepareDetachContentFromPip();
+            ((PictureInPictureActivityHandler) activity).removeActivityPipView(attachedToPictureInPictureView);
+            listener.attachContentToWindow();
+
+            attachedToPictureInPictureView = null;
+
+            // Log.i(TAG, "[LIFECYCLE] pip detach " + tag);
+        }
     }
 
     public static class Builder {
+        private final PictureInPictureContentViewProvider listener;
         private final Activity activity;
-        private final IPipSourceDelegate delegate;
 
-        private IPipActivityActionListener actionListener;
         private String tagPrefix;
-        private int cornerRadius;
         private int priority = 0;
         private boolean needMediaSession = false;
         private Player player;
         private int width, height;
         private View contentView;
-        private View placeholderView;
 
-        public Builder(Activity activity, IPipSourceDelegate delegate) {
+        public Builder(Activity activity, PictureInPictureContentViewProvider listener) {
             this.activity = activity;
-            this.delegate = delegate;
+            this.listener = listener;
         }
 
         public Builder setTagPrefix(String tagPrefix) {
@@ -197,21 +238,6 @@ public class PipSource {
 
         public Builder setPriority(int priority) {
             this.priority = priority;
-            return this;
-        }
-
-        public Builder setActionListener(IPipActivityActionListener actionListener) {
-            this.actionListener = actionListener;
-            return this;
-        }
-
-        public Builder setPlaceholderView(View placeholderView) {
-            this.placeholderView = placeholderView;
-            return this;
-        }
-
-        public Builder setCornerRadius(int cornerRadius) {
-            this.cornerRadius = cornerRadius;
             return this;
         }
 
@@ -237,12 +263,7 @@ public class PipSource {
         }
 
         public PipSource build() {
-            if (activity instanceof IPipActivity) {
-                PipActivityController controller = ((IPipActivity) activity).getPipController();
-                return new PipSource(controller, this);
-            }
-
-            return null;
+            return new PipSource(this);
         }
     }
 }

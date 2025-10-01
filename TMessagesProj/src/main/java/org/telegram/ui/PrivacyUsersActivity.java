@@ -24,7 +24,7 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -45,7 +45,7 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.ArrayList;
 
-public class PrivacyUsersActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+public class PrivacyUsersActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, ContactsActivity.ContactsActivityDelegate {
 
     private RecyclerListView listView;
     private LinearLayoutManager layoutManager;
@@ -384,6 +384,14 @@ public class PrivacyUsersActivity extends BaseFragment implements NotificationCe
         if (listViewAdapter != null) {
             listViewAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void didSelectContact(final TLRPC.User user, String param, ContactsActivity activity) {
+        if (user == null) {
+            return;
+        }
+        getMessagesController().blockPeer(user.id);
     }
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {

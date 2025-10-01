@@ -56,6 +56,10 @@ import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Log;
+
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.ChatObject;
@@ -65,7 +69,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -859,9 +863,9 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
         listView.addItemDecoration(itemDecoration = new GroupCreateDividerItemDecoration());
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL, 0, 0, 0, isCall ? 14 + 48 + 14 : 0));
         listView.setOnItemClickListener((view, position) -> {
-            if (position == adapter.createCallLinkRow) {
+            /*if (position == adapter.createCallLinkRow) {
                 CallLogActivity.createCallLink(context, currentAccount, resourceProvider, this::finishFragment);
-            } else if (position == 0 && adapter.inviteViaLink != 0 && !adapter.searching) {
+            } else*/ if (position == 0 && adapter.inviteViaLink != 0 && !adapter.searching) {
                 sharedLinkBottomSheet = new PermanentLinkBottomSheet(context, false, this, info, chatId, channelId != 0);
                 showDialog(sharedLinkBottomSheet);
             } else if (view instanceof GroupCreateUserCell) {
@@ -892,10 +896,14 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                 }
                 Object object = cell.getObject();
                 long id;
+                TLRPC.User user_ = null;
+                TLRPC.Chat chat_ = null;
                 if (object instanceof TLRPC.User) {
                     id = ((TLRPC.User) object).id;
+                    user_ = ((TLRPC.User) object);
                 } else if (object instanceof TLRPC.Chat) {
                     id = -((TLRPC.Chat) object).id;
+                    chat_ = ((TLRPC.Chat) object);
                 } else {
                     return;
                 }
@@ -904,6 +912,11 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                 }
                 if (cell.isBlocked()) {
                     showPremiumBlockedToast(cell, id);
+                    return;
+                }
+                if (cell.isElariBlocked()) {
+                    if(chat_!=null){ElariUtils.sendChatRequest(GroupCreateActivity.this, getContext(), chat_.id, chat_, null);}
+                    if(user_!=null){ElariUtils.sendChatRequest(GroupCreateActivity.this, getContext(), user_.id, null, user_);}
                     return;
                 }
                 boolean exists;
@@ -1517,7 +1530,7 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
         private ArrayList<TLObject> contacts = new ArrayList<>();
         private int userTypesHeaderRow;
         private int firstSectionRow;
-        private int createCallLinkRow;
+        //private int createCallLinkRow;
         private int premiumRow;
         private int miniappsRow;
         private int usersStartRow;
@@ -1646,7 +1659,7 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
             int count;
             noContactsStubRow = -1;
             userTypesHeaderRow = -1;
-            createCallLinkRow = -1;
+            //createCallLinkRow = -1;
             firstSectionRow = -1;
             premiumRow = -1;
             miniappsRow = -1;
@@ -1663,7 +1676,7 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
             } else {
                 count = 0;
                 if (isCall) {
-                    createCallLinkRow = count++;
+                    //createCallLinkRow = count++;
                 }
                 if (allowPremium) {
                     userTypesHeaderRow = firstSectionRow = count++;
@@ -1842,7 +1855,7 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                         id = 0;
                     }
                     if (id != 0) {
-                        if (ignoreUsers != null && ignoreUsers.indexOfKey(id) >= 0) {
+                        if (ignoreUsers != null && ignoreUsers.indexOfKey(id) >= 0){
                             cell.setChecked(true, false);
                             cell.setCheckBoxEnabled(false);
                         } else {
@@ -1850,14 +1863,24 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                             cell.setCheckBoxEnabled(true);
                         }
                     }
+
+                    if(ElariUtils.getAccess(id) != C.ACCESS_ALLOWED){
+//                        cell.setVisibility(View.GONE);
+//                        cell.setForbiddenCheck(true);
+                        cell.setBlock(true);
+                    }else{
+//                        cell.setVisibility(View.VISIBLE);
+//                        cell.setForbiddenCheck(false);
+                        cell.setBlock(false);
+                    }
                     break;
                 }
                 case 2: {
                     TextCell textCell = (TextCell) holder.itemView;
-                    if (position == createCallLinkRow) {
+                    /*if (position == createCallLinkRow) {
                         textCell.setTextAndIcon(getString(R.string.GroupCallCreateLink), R.drawable.menu_link_create2, false);
                         textCell.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
-                    } else if (inviteViaLink == 2) {
+                    } else*/if (inviteViaLink == 2) {
                         textCell.setTextAndIcon(getString(R.string.ChannelInviteViaLink), R.drawable.msg_link2, false);
                         textCell.setColors(Theme.key_windowBackgroundWhiteGrayIcon, Theme.key_windowBackgroundWhiteBlackText);
                     } else {
@@ -1877,9 +1900,9 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                 }
                 return 1;
             } else {
-                if (position == createCallLinkRow) {
-                    return 2;
-                }
+//                if (position == createCallLinkRow) {
+//                    return 2;
+//                }
                 if (position == userTypesHeaderRow) {
                     return 0;
                 }

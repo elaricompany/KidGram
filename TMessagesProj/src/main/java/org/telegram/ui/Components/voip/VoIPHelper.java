@@ -34,7 +34,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.voip.Instance;
@@ -79,7 +79,12 @@ public class VoIPHelper {
 			return;
 		}
 		if (userFull != null && userFull.phone_calls_private) {
-			AlertsCreator.showCallsForbidden(activity, accountInstance.getCurrentAccount(), user.id, null);
+			new AlertDialog.Builder(activity)
+					.setTitle(LocaleController.getString(R.string.VoipFailed))
+					.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("CallNotAvailable", R.string.CallNotAvailable,
+							ContactsController.formatName(user.first_name, user.last_name))))
+					.setPositiveButton(LocaleController.getString(R.string.OK), null)
+					.show();
 			return;
 		}
 		if (ConnectionsManager.getInstance(UserConfig.selectedAccount).getConnectionState() != ConnectionsManager.ConnectionStateConnected) {
@@ -418,22 +423,23 @@ public class VoIPHelper {
 	public static void permissionDenied(final Activity activity, final Runnable onFinish, int code) {
 		boolean mergedRequest = code == 102;
 		if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) || mergedRequest && !activity.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-			AlertDialog.Builder dlg = new AlertDialog.Builder(activity)
-					.setMessage(AndroidUtilities.replaceTags(mergedRequest ? LocaleController.getString(R.string.VoipNeedMicCameraPermissionWithHint) : LocaleController.getString(R.string.VoipNeedMicPermissionWithHint)))
-					.setPositiveButton(LocaleController.getString(R.string.Settings), (dialog, which) -> {
-						Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-						Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
-						intent.setData(uri);
-						activity.startActivity(intent);
-					})
-					.setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
-					.setOnDismissListener(dialog -> {
-						if (onFinish != null)
-							onFinish.run();
-					})
-					.setTopAnimation(mergedRequest ? R.raw.permission_request_camera : R.raw.permission_request_microphone, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground));
-
-			dlg.show();
+			//Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//			AlertDialog.Builder dlg = new AlertDialog.Builder(activity)
+//					.setMessage(AndroidUtilities.replaceTags(mergedRequest ? LocaleController.getString(R.string.VoipNeedMicCameraPermissionWithHint) : LocaleController.getString(R.string.VoipNeedMicPermissionWithHint)))
+//					.setPositiveButton(LocaleController.getString(R.string.Settings), (dialog, which) -> {
+//						Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//						Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+//						intent.setData(uri);
+//						activity.startActivity(intent);
+//					})
+//					.setNegativeButton(LocaleController.getString(R.string.ContactsPermissionAlertNotNow), null)
+//					.setOnDismissListener(dialog -> {
+//						if (onFinish != null)
+//							onFinish.run();
+//					})
+//					.setTopAnimation(mergedRequest ? R.raw.permission_request_camera : R.raw.permission_request_microphone, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground));
+//
+//			dlg.show();
 		}
 	}
 

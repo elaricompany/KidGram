@@ -358,9 +358,6 @@ public class PhotoView extends EntityView {
     private Paint highlightPaint;
     private boolean needHighlight;
 
-    private final android.graphics.Rect bitmapSrc = new android.graphics.Rect();
-    private final android.graphics.Rect bitmapDst = new android.graphics.Rect();
-
     private final Paint bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
     protected void stickerDraw(Canvas canvas) {
@@ -402,9 +399,7 @@ public class PhotoView extends EntityView {
                     canvas.rotate(getOrientation());
                 }
                 canvas.translate(-bitmap.getWidth() / 2.0f, -bitmap.getHeight() / 2.0f);
-                bitmapSrc.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                bitmapDst.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                canvas.drawBitmap(bitmap, bitmapSrc, bitmapDst, bitmapPaint);
+                canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
             }
             canvas.restore();
             if (segmentedT > 0) {

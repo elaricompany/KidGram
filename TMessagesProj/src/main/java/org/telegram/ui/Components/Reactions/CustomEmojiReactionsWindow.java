@@ -43,7 +43,7 @@ import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
@@ -105,7 +105,7 @@ public class CustomEmojiReactionsWindow {
     private ValueAnimator valueAnimator;
     private final int type;
 
-    public CustomEmojiReactionsWindow(int type, BaseFragment baseFragment, List<ReactionsLayoutInBubble.VisibleReaction> reactions, HashSet<ReactionsLayoutInBubble.VisibleReaction> selectedReactions, ReactionsContainerLayout reactionsContainerLayout, Theme.ResourcesProvider resourcesProvider, boolean forceAttachToParent) {
+    public CustomEmojiReactionsWindow(int type, BaseFragment baseFragment, List<ReactionsLayoutInBubble.VisibleReaction> reactions, HashSet<ReactionsLayoutInBubble.VisibleReaction> selectedReactions, ReactionsContainerLayout reactionsContainerLayout, Theme.ResourcesProvider resourcesProvider) {
         this.type = type;
         this.reactions = reactions;
         this.baseFragment = baseFragment;
@@ -166,7 +166,7 @@ public class CustomEmojiReactionsWindow {
                 dismiss();
             }
         });
-        attachToParent = type == TYPE_STORY_LIKES || type == TYPE_STICKER_SET_EMOJI || type == TYPE_MESSAGE_EFFECTS || forceAttachToParent;
+        attachToParent = type == TYPE_STORY_LIKES || type == TYPE_STICKER_SET_EMOJI || type == TYPE_MESSAGE_EFFECTS;
 
         // sizeNotifierFrameLayout.setFitsSystemWindows(true);
 

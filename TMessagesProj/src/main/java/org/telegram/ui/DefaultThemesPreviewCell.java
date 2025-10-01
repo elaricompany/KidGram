@@ -25,7 +25,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.EmojiThemes;
@@ -95,7 +95,7 @@ public class DefaultThemesPreviewCell extends LinearLayout {
             ChatThemeBottomSheet.ChatThemeItem chatTheme = adapter.items.get(position);
             Theme.ThemeInfo info = chatTheme.chatTheme.getThemeInfo(themeIndex);
             int accentId = -1;
-            if (chatTheme.chatTheme.getEmoticonOrSlug().equals("\uD83C\uDFE0") || chatTheme.chatTheme.getEmoticonOrSlug().equals("\uD83C\uDFA8")) {
+            if (chatTheme.chatTheme.getEmoticon().equals("\uD83C\uDFE0") || chatTheme.chatTheme.getEmoticon().equals("\uD83C\uDFA8")) {
                 accentId = chatTheme.chatTheme.getAccentId(themeIndex);
             }
             if (info == null) {

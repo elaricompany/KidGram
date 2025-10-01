@@ -39,7 +39,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SavedMessagesController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -237,48 +237,6 @@ public final class BulletinFactory {
         layout.titleTextView.setMaxLines(1);
         layout.titleTextView.setTypeface(null);
         layout.subtitleTextView.setVisibility(View.GONE);
-        return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
-    }
-
-    public Bulletin createSimpleMultiBulletin(TLRPC.Document document, CharSequence text) {
-        if (document == null) return new Bulletin.EmptyBulletin();
-        final Bulletin.TwoLineLayout layout = new Bulletin.TwoLineLayout(getContext(), resourcesProvider);
-        TLRPC.PhotoSize thumbSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, null, false);
-        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, thumbSize, true);
-        layout.imageView.setImage(
-            ImageLocation.getForDocument(photoSize, document), "28_28",
-            ImageLocation.getForDocument(thumbSize, document), "28_28",
-            null, 0, 0, null
-        );
-        layout.imageView.getImageReceiver().setRoundRadius(dp(5));
-        layout.titleTextView.setSingleLine(false);
-        layout.titleTextView.setText(text);
-        layout.titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        layout.titleTextView.setMaxLines(3);
-        layout.titleTextView.setTypeface(null);
-        layout.subtitleTextView.setVisibility(View.GONE);
-        return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
-    }
-
-    public Bulletin createSimpleBulletin(TLRPC.Document document, CharSequence title, CharSequence text) {
-        if (document == null) return new Bulletin.EmptyBulletin();
-        final Bulletin.TwoLineLayout layout = new Bulletin.TwoLineLayout(getContext(), resourcesProvider);
-        TLRPC.PhotoSize thumbSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, null, false);
-        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, thumbSize, true);
-        layout.imageView.setImage(
-            ImageLocation.getForDocument(photoSize, document), "28_28",
-            ImageLocation.getForDocument(thumbSize, document), "28_28",
-            null, 0, 0, null
-        );
-        layout.imageView.getImageReceiver().setRoundRadius(dp(5));
-        layout.titleTextView.setText(title);
-        layout.titleTextView.setSingleLine(true);
-        layout.titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        layout.titleTextView.setMaxLines(1);
-        layout.titleTextView.setTypeface(AndroidUtilities.bold());
-        layout.subtitleTextView.setText(text);
-        layout.subtitleTextView.setSingleLine(false);
-        layout.subtitleTextView.setMaxLines(5);
         return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
     }
 
@@ -1027,7 +985,7 @@ public final class BulletinFactory {
         }
     }
 
-    public Context getContext() {
+    private Context getContext() {
         Context context = null;
         if (fragment != null) {
             context = fragment.getParentActivity();
@@ -1041,10 +999,6 @@ public final class BulletinFactory {
             context = ApplicationLoader.applicationContext;
         }
         return context;
-    }
-
-    public Theme.ResourcesProvider getResourcesProvider() {
-        return resourcesProvider;
     }
 
     //region Static Factory
@@ -1235,7 +1189,7 @@ public final class BulletinFactory {
         layout.textView.setSingleLine(false);
         layout.textView.setMaxLines(3);
         layout.textView.setText(text);
-        return create(layout, Bulletin.DURATION_LONG);
+        return Bulletin.make(fragment, layout, Bulletin.DURATION_LONG);
     }
 
     public boolean showForwardedBulletinWithTag(long did, int messagesCount) {

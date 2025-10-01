@@ -70,7 +70,7 @@ public class UniversalRecyclerView extends RecyclerListView {
         Utilities.Callback5Return<UItem, View, Integer, Float, Float, Boolean> onLongClick,
         Theme.ResourcesProvider resourcesProvider
     ) {
-        this(context, currentAccount, classGuid, dialog, fillItems, onClick, onLongClick, resourcesProvider, UItem.MAX_SPAN_COUNT, LinearLayoutManager.VERTICAL);
+        this(context, currentAccount, classGuid, dialog, fillItems, onClick, onLongClick, resourcesProvider, UItem.MAX_SPAN_COUNT);
     }
 
     public UniversalRecyclerView(
@@ -82,13 +82,12 @@ public class UniversalRecyclerView extends RecyclerListView {
         Utilities.Callback5<UItem, View, Integer, Float, Float> onClick,
         Utilities.Callback5Return<UItem, View, Integer, Float, Float, Boolean> onLongClick,
         Theme.ResourcesProvider resourcesProvider,
-        int spansCount,
-        int orientation
+        int spansCount
     ) {
         super(context, resourcesProvider);
 
         if (spansCount == UItem.MAX_SPAN_COUNT) {
-            setLayoutManager(layoutManager = new LinearLayoutManager(context, orientation, false) {
+            setLayoutManager(layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false) {
                 @Override
                 protected int getExtraLayoutSpace(State state) {
                     if (doNotDetachViews) return AndroidUtilities.displaySize.y;
@@ -184,35 +183,13 @@ public class UniversalRecyclerView extends RecyclerListView {
         }
     }
 
-    public int getSpanCount() {
-        if (layoutManager instanceof ExtendedGridLayoutManager) {
-            return ((ExtendedGridLayoutManager) layoutManager).getSpanCount();
-        }
-        return UItem.MAX_SPAN_COUNT;
-    }
-
-    public void listenReorder(Utilities.Callback2<Integer, ArrayList<UItem>> onReordered) {
-        listenReorder(onReordered, false);
-    }
-
-    private boolean reorderingOnOtherAxis;
     private boolean reorderingAllowed;
     public void listenReorder(
-        Utilities.Callback2<Integer, ArrayList<UItem>> onReordered,
-        boolean otherAxis
+        Utilities.Callback2<Integer, ArrayList<UItem>> onReordered
     ) {
-        reorderingOnOtherAxis = otherAxis;
         itemTouchHelper = new ItemTouchHelper(new TouchHelperCallback());
         itemTouchHelper.attachToRecyclerView(this);
         adapter.listenReorder(onReordered);
-    }
-
-    protected void swappedElements() {
-
-    }
-
-    public boolean isReorderAllowed() {
-        return reorderingAllowed;
     }
 
     public void allowReorder(boolean allow) {
@@ -295,19 +272,7 @@ public class UniversalRecyclerView extends RecyclerListView {
         @Override
         public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
             if (reorderingAllowed && adapter.isReorderItem(viewHolder.getAdapterPosition())) {
-                int flags = 0;
-                if (layoutManager.getOrientation() == LinearLayoutManager.HORIZONTAL) {
-                    flags |= ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-                    if (reorderingOnOtherAxis) {
-                        flags |= ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                    }
-                } else {
-                    flags |= ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                    if (reorderingOnOtherAxis) {
-                        flags |= ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-                    }
-                }
-                return makeMovementFlags(flags, 0);
+                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
             } else {
                 return makeMovementFlags(0, 0);
             }
@@ -319,7 +284,6 @@ public class UniversalRecyclerView extends RecyclerListView {
                 return false;
             }
             adapter.swapElements(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-            swappedElements();
             return true;
         }
 

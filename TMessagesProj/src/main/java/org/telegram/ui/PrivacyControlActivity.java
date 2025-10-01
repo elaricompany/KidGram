@@ -54,7 +54,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -154,9 +154,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     private int p2pDetailRow;
     private int readRow;
     private int readDetailRow;
-    private int readPremiumRow;
-    private int readPremiumDetailRow;
-    private int payRow;
+//    private int readPremiumRow;
+    //private int readPremiumDetailRow;
+    //private int payRow;
     private int priceHeaderRow;
     private int priceRow;
     private int priceButtonRow;
@@ -356,7 +356,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             });
             cell.isChat = false;
             cell.setFullyDraw(true);
-            cell.setMessageObject(messageObject, null, false, false, false);
+            cell.setMessageObject(messageObject, null, false, false);
             addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             hintView = new HintView(context, 1, true);
@@ -649,7 +649,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 ).show();
                 BotWebViewVibrationEffect.APP_ERROR.vibrate();
                 AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
-            } else if (position == nobodyRow || position == everybodyRow || position == myContactsRow || position == payRow) {
+            } else if (position == nobodyRow || position == everybodyRow || position == myContactsRow /*|| position == payRow*/) {
                 if (rulesType == PRIVACY_RULES_TYPE_GIFTS && areAllStarGiftsDisabled()) {
                     AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
                     return;
@@ -659,9 +659,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     newType = TYPE_NOBODY;
                 } else if (position == everybodyRow) {
                     newType = TYPE_EVERYBODY;
-                } else if (position == payRow) {
+                }/* else if (position == payRow) {
                     newType = TYPE_PAY;
-                } else {
+                } */else {
                     newType = TYPE_CONTACTS;
                 }
                 if (newType == currentType) {
@@ -743,16 +743,16 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 selectedReadValue = !selectedReadValue;
                 updateDoneButton();
                 ((TextCheckCell) view).setChecked(selectedReadValue);
-            } else if (position == readPremiumRow) {
+            } /*else if (position == readPremiumRow) {
                 presentFragment(new PremiumPreviewFragment("lastseen"));
-            } else if (position == showGiftIconRow) {
+            } */else if (position == showGiftIconRow) {
                 selectedGiftIconValue = !selectedGiftIconValue;
                 updateDoneButton();
                 ((TextCheckCell) view).setChecked(selectedGiftIconValue);
             } else if (position == giftTypeLimitedRow) {
                 if (selectedGiftLimitedValue && !getUserConfig().isPremium()) {
-                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
-                    showPremiumBulletin();
+//                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
+//                    showPremiumBulletin();
                     return;
                 }
                 final boolean wereDisabled = areAllStarGiftsDisabled();
@@ -768,8 +768,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
             } else if (position == giftTypeUnlimitedRow) {
                 if (selectedGiftUnlimitedValue && !getUserConfig().isPremium()) {
-                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
-                    showPremiumBulletin();
+//                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
+//                    showPremiumBulletin();
                     return;
                 }
                 final boolean wereDisabled = areAllStarGiftsDisabled();
@@ -785,8 +785,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
             } else if (position == giftTypeUniqueRow) {
                 if (selectedGiftUniqueValue && !getUserConfig().isPremium()) {
-                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
-                    showPremiumBulletin();
+//                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
+//                    showPremiumBulletin();
                     return;
                 }
                 final boolean wereDisabled = areAllStarGiftsDisabled();
@@ -802,8 +802,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }
             } else if (position == giftTypePremiumRow) {
                 if (selectedGiftPremiumValue && !getUserConfig().isPremium()) {
-                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
-                    showPremiumBulletin();
+//                    AndroidUtilities.shakeViewSpring(view, shakeDp = -shakeDp);
+//                    showPremiumBulletin();
                     return;
                 }
                 final boolean wereDisabled = areAllStarGiftsDisabled();
@@ -891,6 +891,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     }
 
     private void applyCurrentPrivacySettings() {
+
         if (rulesType == PRIVACY_RULES_TYPE_MESSAGES) {
 
             final boolean[] done = new boolean[2];
@@ -901,7 +902,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 if (!initialPlus.equals(currentPlus)) {
                     done[0] = false;
                     TL_account.setPrivacy req = new TL_account.setPrivacy();
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyNoPaidMessages;
+                    req.key = new TLRPC.TL_inputPrivacyKeyNoPaidMessages();
                     req.rules.add(new TLRPC.TL_inputPrivacyValueAllowContacts());
                     if (currentType != 0 && currentPlus.size() > 0) {
                         TLRPC.TL_inputPrivacyValueAllowUsers usersRule = new TLRPC.TL_inputPrivacyValueAllowUsers();
@@ -994,10 +995,10 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
         TL_account.setPrivacy req = new TL_account.setPrivacy();
         if (rulesType == PRIVACY_RULES_TYPE_PHONE) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneNumber;
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneNumber();
             if (currentType == TYPE_NOBODY) {
                 TL_account.setPrivacy req2 = new TL_account.setPrivacy();
-                req2.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAddedByPhone;
+                req2.key = new TLRPC.TL_inputPrivacyKeyAddedByPhone();
                 if (currentSubType == 0) {
                     req2.rules.add(new TLRPC.TL_inputPrivacyValueAllowAll());
                 } else {
@@ -1017,30 +1018,31 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 }), ConnectionsManager.RequestFlagFailOnServerErrors);
             }
         } else if (rulesType == PRIVACY_RULES_TYPE_FORWARDS) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyForwards;
+            req.key = new TLRPC.TL_inputPrivacyKeyForwards();
         } else if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyProfilePhoto;
+            req.key = new TLRPC.TL_inputPrivacyKeyProfilePhoto();
         } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAbout;
+            req.key = new TLRPC.TL_inputPrivacyKeyAbout();
         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneP2P;
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneP2P();
         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneCall;
+            req.key = new TLRPC.TL_inputPrivacyKeyPhoneCall();
         } else if (rulesType == PRIVACY_RULES_TYPE_INVITE) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyChatInvite;
+            req.key = new TLRPC.TL_inputPrivacyKeyChatInvite();
         } else if (rulesType == PRIVACY_RULES_TYPE_VOICE_MESSAGES) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyVoiceMessages;
+            req.key = new TLRPC.TL_inputPrivacyKeyVoiceMessages();
         } else if (rulesType == PRIVACY_RULES_TYPE_BIRTHDAY) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyBirthday;
+            req.key = new TLRPC.TL_inputPrivacyKeyBirthday();
         } else if (rulesType == PRIVACY_RULES_TYPE_GIFTS) {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStarGiftsAutoSave;
+            req.key = new TLRPC.TL_inputPrivacyKeyStarGiftsAutoSave();
         } else {
-            req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStatusTimestamp;
+            req.key = new TLRPC.TL_inputPrivacyKeyStatusTimestamp();
         }
         if (currentType != 0 && currentPlus.size() > 0) {
             TLRPC.TL_inputPrivacyValueAllowUsers usersRule = new TLRPC.TL_inputPrivacyValueAllowUsers();
             TLRPC.TL_inputPrivacyValueAllowChatParticipants chatsRule = new TLRPC.TL_inputPrivacyValueAllowChatParticipants();
             for (int a = 0; a < currentPlus.size(); a++) {
+
                 long id = currentPlus.get(a);
                 if (DialogObject.isUserDialog(id)) {
                     TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(id);
@@ -1424,13 +1426,13 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         nobodyRow = -1;
         shareSectionRow = -1;
         shareDetailRow = -1;
-        payRow = -1;
+        //payRow = -1;
         priceHeaderRow = -1;
         priceRow = -1;
         priceInfoRow = -1;
         priceButtonRow = -1;
-        readPremiumRow = -1;
-        readPremiumDetailRow = -1;
+       // readPremiumRow = -1;
+        //readPremiumDetailRow = -1;
         showGiftIconRow = -1;
         showGiftIconInfoRow = -1;
         giftTypesHeaderRow = -1;
@@ -1473,7 +1475,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             nobodyRow = rowCount++;
         }
         if (getMessagesController().starsPaidMessagesAvailable && rulesType == PRIVACY_RULES_TYPE_MESSAGES) {
-            payRow = rowCount++;
+            //payRow = rowCount++;
         }
         if (rulesType == PRIVACY_RULES_TYPE_PHONE && currentType == TYPE_NOBODY) {
             phoneDetailRow = rowCount++;
@@ -1528,8 +1530,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 readDetailRow = rowCount++;
             }
             if (rulesType == PRIVACY_RULES_TYPE_LASTSEEN && !getMessagesController().premiumFeaturesBlocked()) {
-                readPremiumRow = rowCount++;
-                readPremiumDetailRow = rowCount++;
+               // readPremiumRow = rowCount++;
+//                readPremiumDetailRow = rowCount++;
             }
         }
 
@@ -1558,7 +1560,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     }
                     int position = holder.getAdapterPosition();
                     RadioCell radioCell = (RadioCell) child;
-                    if (position == everybodyRow || position == myContactsRow || position == nobodyRow || position == payRow) {
+                    if (position == everybodyRow || position == myContactsRow || position == nobodyRow /*|| position == payRow*/) {
                         int checkedType;
                         if (position == everybodyRow) {
                             checkedType = TYPE_EVERYBODY;
@@ -1691,9 +1693,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int position = holder.getAdapterPosition();
             return position == p2pRow && !ContactsController.getInstance(currentAccount).getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_P2P) ||
-                    position == currentPhotoForRestRow || position == photoForRestDescriptionRow || position == photoForRestRow || position == readRow || position == showGiftIconRow || position == readPremiumRow ||
+                    position == currentPhotoForRestRow || position == photoForRestDescriptionRow || position == photoForRestRow || position == readRow || position == showGiftIconRow || /*position == readPremiumRow ||*/
                     position == giftTypeUniqueRow || position == giftTypePremiumRow || position == giftTypeLimitedRow || position == giftTypeUnlimitedRow ||
-                    (rulesType != PRIVACY_RULES_TYPE_GIFTS || !areAllStarGiftsDisabled()) && (position == nobodyRow || position == myContactsRow || position == payRow || position == everybodyRow || position == neverShareRow || position == alwaysShareRow);
+                    (rulesType != PRIVACY_RULES_TYPE_GIFTS || !areAllStarGiftsDisabled()) && (position == nobodyRow || position == myContactsRow ||/*position == payRow ||*/ position == everybodyRow || position == neverShareRow || position == alwaysShareRow);
         }
 
         @Override
@@ -1896,10 +1898,10 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                             value = PrivacySettingsActivity.formatRulesString(getAccountInstance(), ContactsController.PRIVACY_RULES_TYPE_P2P);
                         }
                         textCell.setTextAndValue(LocaleController.getString(R.string.PrivacyP2P2), value, false);
-                    } else if (position == readPremiumRow) {
+                    }/* else if (position == readPremiumRow) {
                         textCell.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.PrivacyLastSeenPremiumForPremium : R.string.PrivacyLastSeenPremium), false);
                         textCell.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueText));
-                    }
+                    }*/
                     break;
                 case 1:
                     TextInfoPrivacyCell privacyCell = (TextInfoPrivacyCell) holder.itemView;
@@ -1908,9 +1910,9 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                         privacyCell.setText(getString(R.string.PrivateMessagesChargePriceInfo));
                         backgroundResId = R.drawable.greydivider;
                     } else if (position == detailRow && rulesType == PRIVACY_RULES_TYPE_MESSAGES) {
-                        privacyCell.setText(AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.PrivacyMessagesInfo), () -> {
-                            presentFragment(new PremiumPreviewFragment("noncontacts"));
-                        }));
+//                        privacyCell.setText(AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.PrivacyMessagesInfo), () -> {
+//                            presentFragment(new PremiumPreviewFragment("noncontacts"));
+//                        }));
                         backgroundResId = R.drawable.greydivider_bottom;
                     } else if (position == detailRow && rulesType == PRIVACY_RULES_TYPE_VOICE_MESSAGES) {
                         privacyCell.setText(LocaleController.getString(R.string.PrivacyVoiceMessagesInfo));
@@ -2062,11 +2064,12 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                         privacyCell.setText(LocaleController.getString(R.string.PhotoForRestDescription));
                     } else if (position == readDetailRow) {
                         privacyCell.setText(LocaleController.getString(R.string.HideReadTimeInfo));
-                        backgroundResId = readPremiumDetailRow == -1 ? R.drawable.greydivider_bottom : R.drawable.greydivider;
-                    } else if (position == readPremiumDetailRow) {
+                        //backgroundResId = readPremiumDetailRow == -1 ? R.drawable.greydivider_bottom : R.drawable.greydivider;
+                        backgroundResId = R.drawable.greydivider_bottom;
+                    } /*else if (position == readPremiumDetailRow) {
                         privacyCell.setText(LocaleController.getString(getUserConfig().isPremium() ? R.string.PrivacyLastSeenPremiumInfoForPremium : R.string.PrivacyLastSeenPremiumInfo));
                         backgroundResId = R.drawable.greydivider_bottom;
-                    } else if (position == priceInfoRow) {
+                    } */else if (position == priceInfoRow) {
                         final float revenuePercent = getMessagesController().starsPaidMessageCommissionPermille / 1000.0f;
                         final String income = String.valueOf((int) ((currentStars * revenuePercent / 1000.0 * getMessagesController().starsUsdWithdrawRate1000)) / 100.0);
                         privacyCell.setText(formatString(R.string.PrivateMessagesPriceInfo, percents(getMessagesController().starsPaidMessageCommissionPermille), income));
@@ -2136,7 +2139,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                 case 3:
                     RadioCell radioCell = (RadioCell) holder.itemView;
                     radioCell.setRadioIcon(null);
-                    if (position == everybodyRow || position == myContactsRow || position == nobodyRow || position == payRow) {
+                    if (position == everybodyRow || position == myContactsRow || position == nobodyRow /*|| position == payRow*/) {
                         if (position == everybodyRow) {
                             if (rulesType == PRIVACY_RULES_TYPE_P2P) {
                                 radioCell.setText(LocaleController.getString(R.string.P2PEverybody), currentType == TYPE_EVERYBODY, true);
@@ -2148,18 +2151,18 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                                 radioCell.setRadioIcon(getContext().getResources().getDrawable(R.drawable.mini_switch_lock).mutate());
                             }
                             if (rulesType == PRIVACY_RULES_TYPE_P2P) {
-                                radioCell.setText(LocaleController.getString(R.string.P2PContacts), currentType == TYPE_CONTACTS, nobodyRow != -1 || payRow != -1);
+                                radioCell.setText(LocaleController.getString(R.string.P2PContacts), currentType == TYPE_CONTACTS, nobodyRow != -1 /*|| payRow != -1*/);
                             } else if (rulesType == PRIVACY_RULES_TYPE_MESSAGES) {
-                                radioCell.setText(LocaleController.getString(R.string.PrivacyMessagesContactsAndPremium), currentType == TYPE_CONTACTS, nobodyRow != -1 || payRow != -1);
+                                radioCell.setText(LocaleController.getString(R.string.PrivacyMessagesContactsAndPremium), currentType == TYPE_CONTACTS, nobodyRow != -1 /*|| payRow != -1*/);
                             } else {
-                                radioCell.setText(LocaleController.getString(R.string.LastSeenContacts), currentType == TYPE_CONTACTS, nobodyRow != -1 || payRow != -1);
+                                radioCell.setText(LocaleController.getString(R.string.LastSeenContacts), currentType == TYPE_CONTACTS, nobodyRow != -1 /*|| payRow != -1*/);
                             }
-                        } else if (position == payRow) {
-                            if (rulesType == PRIVACY_RULES_TYPE_MESSAGES && !getUserConfig().isPremium()/* || rulesType == PRIVACY_RULES_TYPE_MESSAGES && !getMessagesController().newNoncontactPeersRequirePremiumWithoutOwnpremium && !getUserConfig().isPremium()*/) {
+                        } /*else if (position == payRow) {
+                            if (rulesType == PRIVACY_RULES_TYPE_MESSAGES && !getUserConfig().isPremium() || rulesType == PRIVACY_RULES_TYPE_MESSAGES && !getMessagesController().newNoncontactPeersRequirePremiumWithoutOwnpremium && !getUserConfig().isPremium()) {
                                 radioCell.setRadioIcon(getContext().getResources().getDrawable(R.drawable.mini_switch_lock).mutate());
                             }
                             radioCell.setText(getString(R.string.PrivateMessagesChargePrice), currentType == TYPE_PAY, false);
-                        } else {
+                        }*/ else {
                             if (rulesType == PRIVACY_RULES_TYPE_VOICE_MESSAGES && !getUserConfig().isPremium() || rulesType == PRIVACY_RULES_TYPE_MESSAGES && !getMessagesController().newNoncontactPeersRequirePremiumWithoutOwnpremium && !getUserConfig().isPremium()) {
                                 radioCell.setRadioIcon(getContext().getResources().getDrawable(R.drawable.mini_switch_lock).mutate());
                             }
@@ -2238,13 +2241,12 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
         @Override
         public int getItemViewType(int position) {
-            if (position == alwaysShareRow || position == neverShareRow || position == p2pRow || position == readPremiumRow) {
+            if (position == alwaysShareRow || position == neverShareRow || position == p2pRow /*|| position == readPremiumRow*/) {
                 return 0;
-            } else if (position == shareDetailRow || position == detailRow || position == detailRow2 || position == priceInfoRow || position == p2pDetailRow || position == photoForRestDescriptionRow || position == readDetailRow || position == readPremiumDetailRow || position == setBirthdayRow || position == showGiftIconInfoRow || position == giftTypesInfoRow) {
-                return 1;
+            } else if (position == shareDetailRow || position == detailRow || position == detailRow2 || position == priceInfoRow || position == p2pDetailRow || position == photoForRestDescriptionRow || position == readDetailRow || /*position == readPremiumDetailRow ||*/ position == setBirthdayRow || position == showGiftIconInfoRow || position == giftTypesInfoRow) {                return 1;
             } else if (position == sectionRow || position == priceHeaderRow || position == shareSectionRow || position == p2pSectionRow || position == phoneSectionRow || position == giftTypesHeaderRow) {
                 return 2;
-            } else if (position == everybodyRow || position == myContactsRow || position == nobodyRow || position == payRow || position == phoneEverybodyRow || position == phoneContactsRow) {
+            } else if (position == everybodyRow || position == myContactsRow || position == nobodyRow || /*position == payRow ||*/ position == phoneEverybodyRow || position == phoneContactsRow) {
                 return 3;
             } else if (position == messageRow) {
                 return 4;
@@ -2302,7 +2304,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             put(++pointer, everybodyRow, sparseIntArray);
             put(++pointer, myContactsRow, sparseIntArray);
             put(++pointer, nobodyRow, sparseIntArray);
-            put(++pointer, payRow, sparseIntArray);
+            //put(++pointer, payRow, sparseIntArray);
             put(++pointer, detailRow, sparseIntArray);
             put(++pointer, shareSectionRow, sparseIntArray);
             put(++pointer, alwaysShareRow, sparseIntArray);
@@ -2320,8 +2322,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             put(++pointer, p2pDetailRow, sparseIntArray);
             put(++pointer, readRow, sparseIntArray);
             put(++pointer, readDetailRow, sparseIntArray);
-            put(++pointer, readPremiumRow, sparseIntArray);
-            put(++pointer, readPremiumDetailRow, sparseIntArray);
+            //put(++pointer, readPremiumRow, sparseIntArray);
+            //put(++pointer, readPremiumDetailRow, sparseIntArray);
             put(++pointer, priceHeaderRow, sparseIntArray);
             put(++pointer, priceRow, sparseIntArray);
             put(++pointer, priceInfoRow, sparseIntArray);

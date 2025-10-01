@@ -41,7 +41,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
@@ -58,8 +58,8 @@ import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalFragment;
-import org.telegram.ui.Components.UniversalRecyclerView;
-
+import org.telegram.ui.Stars.StarsIntroActivity;
+import org.telegram.ui.Stories.bots.BotPreviewsEditContainer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -631,7 +631,7 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             }
 
             @Override
-            public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
+            public void bindView(View view, UItem item, boolean divider) {
                 ((WebsiteView) view).set(item.text, (ArrayList<String>) item.object2, item.object instanceof Bitmap ? ((Bitmap) item.object) : null, divider);
             }
 

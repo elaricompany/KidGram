@@ -18,7 +18,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.browser.Browser;
@@ -50,7 +50,7 @@ public class AccountFrozenAlert {
         }
         try {
             final Matcher m = Pattern.compile("t\\.me/([a-zA-Z0-9]+)/?").matcher(MessagesController.getInstance(currentAccount).freezeAppealUrl);
-            return m.find() && username.equalsIgnoreCase(m.group(1));
+            return m.matches() && username.equalsIgnoreCase(m.group(1));
         } catch (Exception e) {
             FileLog.e(e);
             return false;

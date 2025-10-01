@@ -26,7 +26,7 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -558,6 +558,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
                         userCell.setAlpha(1.0f);
                     }
                 }
+
                 break;
             case 1:
                 TextCell textCell = (TextCell) holder.itemView;

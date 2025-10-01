@@ -34,7 +34,7 @@ import org.telegram.messenger.SMSJobController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
-import org.telegram.messenger.web.R;
+import org.elarikg.messenger.web.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.TL_smsjobs;
@@ -336,7 +336,7 @@ public class SMSSubscribeSheet {
                 }
                 new AlertDialog.Builder(activity)
                     .setMessage(AndroidUtilities.replaceTags(getString(messageResId)))
-                    .setPositiveButton(LocaleController.getString(R.string.Settings), (dialog, which) -> {
+                    .setPositiveButton(LocaleController.getString("Settings", R.string.Settings), (dialog, which) -> {
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                         Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
                         intent.setData(uri);

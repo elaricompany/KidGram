@@ -16,7 +16,9 @@ import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -28,6 +30,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
+import org.telegram.elari.elariapi.pojo.ChatAccess;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
@@ -35,7 +43,7 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -52,14 +60,19 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.UItem;
+import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.NotificationsSettingsActivity;
 import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import org.telegram.ui.Stories.StoriesUtilities;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+
 public class UserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public BackupImageView avatarImageView;
+    public BackupImageView avatarImageViewBlur;
+    public BackupImageView lockImg;
     protected SimpleTextView nameTextView;
     protected SimpleTextView statusTextView;
     private ImageView imageView;
@@ -73,6 +86,7 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
     private final AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable emojiStatus;
     private ImageView closeView;
     protected Theme.ResourcesProvider resourcesProvider;
+    long accessElement = C.ACCESS_WAIT;
 
     protected AvatarDrawable avatarDrawable;
     private boolean storiable;
@@ -171,6 +185,22 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
         };
         avatarImageView.setRoundRadius(dp(24));
         addView(avatarImageView, LayoutHelper.createFrame(46, 46, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : 7 + padding, 6, LocaleController.isRTL ? 7 + padding : 0, 0));
+
+        avatarImageViewBlur = new BackupImageView(context) {
+            @Override protected void onDraw(Canvas canvas) {super.onDraw(canvas);}
+            @Override public boolean onTouchEvent(MotionEvent event) { return super.onTouchEvent(event); }
+        };
+        avatarImageViewBlur.setRoundRadius(dp(24));
+        addView(avatarImageViewBlur, LayoutHelper.createFrame(46, 46, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : 7 + padding, 6, LocaleController.isRTL ? 7 + padding : 0, 0));
+
+
+        lockImg = new BackupImageView(context) {
+            @Override protected void onDraw(Canvas canvas) {super.onDraw(canvas);}
+            @Override public boolean onTouchEvent(MotionEvent event) { return super.onTouchEvent(event); }
+        };
+        lockImg.setRoundRadius(dp(24));
+        addView(lockImg, LayoutHelper.createFrame(24, 24, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 0 : 7 + padding, 0, LocaleController.isRTL ? 7 + padding : 0, 0));
+
         setClipChildren(false);
 
         nameTextView = new SimpleTextView(context);
@@ -227,6 +257,12 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
         layoutParams.leftMargin = dp(LocaleController.isRTL ? 0 : 7 + padding);
         layoutParams.rightMargin = dp(LocaleController.isRTL ? 7 + padding : 0);
         avatarImageView.setLayoutParams(layoutParams);
+        avatarImageViewBlur.setLayoutParams(layoutParams);
+
+        layoutParams = (LayoutParams) lockImg.getLayoutParams();
+        layoutParams.rightMargin = dp(LocaleController.isRTL ? 0 : 7 + 8);
+        layoutParams.leftMargin  = dp(LocaleController.isRTL ? 7 + 8 : 0);
+        lockImg.setLayoutParams(layoutParams);
 
         layoutParams = (LayoutParams) nameTextView.getLayoutParams();
         layoutParams.leftMargin = dp(LocaleController.isRTL ? 28 + (checkBoxBig != null ? 18 : 0) : (64 + padding));
@@ -459,6 +495,15 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
             dialogId = currentChat.id;
         }
 
+        accessElement = C.ACCESS_WAIT;
+        for(ChatAccess ca : DialogsActivity.accessList){
+            if(Math.abs(ca.getId()) == Math.abs(dialogId)){
+                accessElement = ca.getAccess();
+                //Log.e("ArtTest", "UserCell access - " + ca.getId() + " | access " + ca.getAccess());
+                break;
+            }
+        }
+
         if (mask != 0) {
             boolean continueUpdate = false;
             if ((mask & MessagesController.UPDATE_MASK_AVATAR) != 0) {
@@ -654,6 +699,41 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
         if (adminTextView != null) {
             adminTextView.setTextColor(Theme.getColor(Theme.key_profile_creatorIcon, resourcesProvider));
         }
+
+
+//        setClickable(accessElement != C.ACCESS_ALLOWED);
+        if(accessElement == C.ACCESS_ALLOWED){
+            lockImg.setVisibility(GONE);
+            //
+        }else{
+            lockImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock));
+            lockImg.setVisibility(VISIBLE);
+            if(ElariUtils.isNeedAvatarBlur()) {
+                boolean isAvatarFind = false;
+                if (currentUser != null) {
+                    if ((currentUser.photo != null) && (currentUser.photo.strippedBitmap != null)) {
+                        BitmapDrawable strippedBitmap = currentUser.photo.strippedBitmap;
+                        avatarImageView.setImageDrawable(strippedBitmap);
+                        isAvatarFind = true;
+                    }
+                }
+                if (!isAvatarFind) {
+
+//                    Glide.with(getContext())
+//                            .load(avatarImageView.getAvatarDrawable()) // Uri, URL, Drawable, Bitmap и т.д.
+//                            .apply(RequestOptions.bitmapTransform(new BlurTransformation(25, 3)))
+//                            .into(imageView);
+
+                    //avatarImageViewBlur.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock));
+
+                    //avatarImageView.setImageDrawable(getResources().getDrawable(R.drawable.blur));
+                    //avatarImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_kidgram_logo));
+                }
+            }
+        }
+
+
+
     }
 
     public void setSelfAsSavedMessages(boolean value) {

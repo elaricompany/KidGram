@@ -196,16 +196,14 @@ public class MessagePreviewParams {
     public boolean webpagePhoto;
 
     public boolean noforwards;
-    public boolean monoforum;
     public boolean hasSecretMessages;
 
     public TLRPC.WebPage webpage;
     public CharacterStyle currentLink;
 
-    public MessagePreviewParams(boolean secret, boolean noforwards, boolean monoforum) {
+    public MessagePreviewParams(boolean secret, boolean noforwards) {
         this.isSecret = secret;
         this.noforwards = secret || noforwards;
-        this.monoforum = monoforum;
     }
 
     public void updateReply(MessageObject replyMessageObject, MessageObject.GroupedMessages group, long dialogId, ChatActivity.ReplyQuote replyQuote) {

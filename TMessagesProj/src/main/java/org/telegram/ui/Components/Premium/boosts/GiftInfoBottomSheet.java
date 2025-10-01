@@ -10,7 +10,7 @@ import android.widget.FrameLayout;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -156,7 +156,7 @@ public class GiftInfoBottomSheet extends BottomSheetWithRecyclerListView {
             @Override
             protected void afterCodeApplied() {
                 AndroidUtilities.runOnUIThread(() -> {
-                    PremiumPreviewBottomSheet previewBottomSheet = new PremiumPreviewBottomSheet(getBaseFragment(), currentAccount, null, null, null, resourcesProvider)
+                    PremiumPreviewBottomSheet previewBottomSheet = new PremiumPreviewBottomSheet(getBaseFragment(), currentAccount, null, null, resourcesProvider)
                             .setAnimateConfetti(true)
                             .setOutboundGift(true);
                     getBaseFragment().showDialog(previewBottomSheet);

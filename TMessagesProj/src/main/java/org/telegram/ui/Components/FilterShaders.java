@@ -11,7 +11,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MediaController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
@@ -1980,7 +1980,7 @@ public class FilterShaders {
         if (bitmap != null && !bitmap.isRecycled()) {
             GLES20.glGenTextures(1, bitmapTextre, 0);
 
-            float maxSize = AndroidUtilities.getPhotoSize(true);
+            float maxSize = AndroidUtilities.getPhotoSize();
             if (scaleBitmap && (renderBufferWidth > maxSize || renderBufferHeight > maxSize) || orientation % 360 != 0) {
                 float scale = 1;
                 if (scaleBitmap && (renderBufferWidth > maxSize || renderBufferHeight > maxSize)) {

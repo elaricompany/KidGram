@@ -39,6 +39,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.android.exoplayer2.C;
 
+import org.elarikg.messenger.R;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -435,14 +436,12 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
 
             mediaSession.setPlaybackState(playbackState.build());
             MediaMetadata.Builder meta = new MediaMetadata.Builder()
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, fullAlbumArt)
                     .putString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST, contentText)
                     .putString(MediaMetadata.METADATA_KEY_ARTIST, contentText)
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
                     .putString(MediaMetadata.METADATA_KEY_TITLE, contentTitle)
                     .putString(MediaMetadata.METADATA_KEY_ALBUM, audioInfo != null && messageObject.isMusic() ? audioInfo.getAlbum() : null);
-            if (fullAlbumArt != null && !fullAlbumArt.isRecycled()) {
-                meta.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, fullAlbumArt);
-            }
 
             mediaSession.setMetadata(meta.build());
 

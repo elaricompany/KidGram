@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram Beta</string>
+    <string name="AppName">KidGram</string>
+    <string name="AppNameBeta">KidGram</string>
     <string name="LanguageName">Русский</string>
     <string name="English">Английский</string>
     <string name="LanguageNameInEnglish">Russian</string>
@@ -215,12 +215,12 @@
     <string name="Page4Title">Безопасный</string>
     <string name="Page5Title">Мощный</string>
     <string name="Page6Title">Облачный</string>
-    <string name="Page1Message">Самый **быстрый** мессенджер в мире.\n**Бесплатный** и **безопасный**.</string>
-    <string name="Page2Message">**Telegram** доставляет сообщения быстрее\nлюбого другого приложения.</string>
-    <string name="Page3Message">**Telegram** предоставляет бесплатное безлимитное облачное хранилище для чатов и медиа.\n</string>
-    <string name="Page4Message">**Telegram** защищает Вашу переписку от злоумышленников.</string>
-    <string name="Page5Message">**Telegram** не ограничивает размер\n Ваших медиафайлов и чатов.</string>
-    <string name="Page6Message">В **Telegram** можно переписываться с любого количества устройств.</string>
+    <string name="Page1Message">Работает на базе Telegram — самом **быстром** в мире приложении для обмена сообщениями.\n**Бесплатный** и **безопасный**.</string>
+    <string name="Page2Message">**KidGram** основан на Telegram, поэтому быстро доставляет сообщения.</string>
+    <string name="Page3Message">**KidGram** предоставляет бесплатное безлимитное облачное хранилище для чатов и медиа.\n</string>
+    <string name="Page4Message">**KidGram** использует протоколы безопасности Telegram и обеспечивает **безопасность ваших сообщений**.</string>
+    <string name="Page5Message">**KidGram** не ограничивает размер\n Ваших чатов.</string>
+    <string name="Page6Message">В **KidGram** можно переписываться с любого количества устройств.</string>
     <string name="StartMessaging">Начать общение</string>
     <!--date formatters-->
     <string name="formatterBoostExpired">dd MMM yyyy</string>
@@ -263,4 +263,65 @@
     <string name="RemindTodayAt">\'Отправить сегодня в\' HH:mm</string>
     <string name="RemindDayAt">\'Отправить\' d MMM \'в\' HH:mm</string>
     <string name="RemindDayYearAt">\'Напомнить\' d MMM yyyy \'в\' HH:mm</string>
+
+    <string name="Kg_invite_text">Привет! Я использую KidGram. Присоединяйся! Скачать здесь: %1$s</string>
+    <string name="url_to_instruction">https://telegra.ph/Kak-privyazat-KidGram-k-ELARI-SafeFamily-07-04</string>
+    <string name="user_agreement_text">Продолжая использовать приложение, вы принимаете условия <a href="https://elari.it/terms_of_use">Пользовательского соглашения</a> и <a href="https://elari.it/privacy_policy">Политики конфиденциальности</a></string>
+    <string name="user_agreement_text_1">Продолжая использовать приложение, вы принимаете условия</string>
+    <string name="user_agreement_text_2">https://элариайти.рф/terms_of_use</string>
+    <string name="user_agreement_text_3">Пользовательского соглашения</string>
+    <string name="user_agreement_text_4">и</string>
+    <string name="user_agreement_text_5">https://элариайти.рф/privacy_policy</string>
+    <string name="user_agreement_text_6">Политики конфиденциальности</string>
+    <string name="fragment_new_device_not_bound_text_1">Привяжите KidGram к ELARI SafeFamily</string>
+    <string name="fragment_new_device_not_bound_text_2">Чтобы все было под контролем, необходимо привязать KidGram к приложению ELARI SafeFamily, установленному на смартфоне или планшете родителя</string>
+    <string name="fragment_new_device_not_bound_text_3">Binding code for ELARI SafeFamily:</string>
+    <string name="check_bind">Проверить привязку</string>
+    <string name="Instruction_for_parents">Инструкция для родителей</string>
+    <string name="applay">Готово</string>
+    <string name="device_not_bound_step1_text_1">Чтобы получить доступ к контактам и чатам, необходимо привязать KidGram к SafeFamily. После завершения привязки перезапустите приложение.\n\nТребуется помощь родителей</string>
+    <string name="step_1">Шаг 1</string>
+    <string name="step_2">Шаг 2</string>
+    <string name="device_not_bound_step_1_text_1">Установите приложение ELARI SafeFamily</string>
+    <string name="device_not_bound_step_1_text_2">На устройстве родителя:</string>
+    <string name="device_not_bound_step_1_text_3">Отсканируйте QR-код с помощью камеры смартфона или специального приложения</string>
+    <string name="or">ИЛИ</string>
+    <string name="device_not_bound_step_1_text_4">Откройте магазин приложений вашей платформы, используйте поиск для нахождения приложения ELARI SafeFamily</string>
+    <string name="device_not_bound_step_1_text_5">Установите или обновите приложение</string>
+    <string name="device_not_bound_step_1_text_6">Откройте приложение и создайте аккаунт или войдите в существующий</string>
+    <string name="device_not_bound_step_2_text_1">Добавьте устройство ребенка</string>
+    <string name="device_not_bound_step_2_text_2">Откройте приложение ELARI SafeFamily на смартфоне родителя</string>
+    <string name="device_not_bound_step_2_text_3">Если у вас нет подключенных детских устройств, окно настроек откроется автоматически. Нажмите на кнопку «Мастер настройки», затем выберите «Смартфон или планшет с приложением KidGram»</string>
+    <string name="device_not_bound_step_2_text_4">Если у вас уже есть подключенное устройство ребенка, в главном окне нажмите на аватар профиля ребенка в правом верхнем углу, затем на кнопку «+».\nНажмите на кнопку «Мастер настройки» и выберите «Смартфон или планшет с приложением KidGram»</string>
+    <string name="device_not_bound_step_2_text_5">Следуйте инструкциям в приложении для привязки KidGram к вашей учетной записи SafeFamily</string>
+    <string name="how_to_bound_kidgram">Как привязать KidGram</string>
+    <string name="refresh_bind_code">Обновить код привязки</string>
+    <string name="next">Далее</string>
+    <string name="search">Поиск</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="request_was_send">Запрос на добавление отправлен родителям.</string>
+    <string name="block_serch_text">Поиск чатов, людей и каналов запрещён.</string>
+    <string name="chanel_lock_text">Временно заблокирован.</string>
+    <string name="chanel_lock_text_need_send_request">Отправьте запрос доступа.</string>
+    <string name="chanel_lock_text_request_was_sended">Запрос доступа отправлен.</string>
+    <string name="request_access_dialog_text_1">Запрос доступа.</string>
+    <string name="request_access_dialog_text_2">Для доступа к чату **%s** необходимо разрешение родителей.</string>
+    <string name="request_access_dialog_text_2_2">Для доступа к чату **%s** необходимо разрешение родителей.\n\nЗапрос был отправлен родителям. Они должны подтвердить его в приложении ELARI SafeFamily.</string>
+    <string name="request_access_dialog_btn_cancel">Отмена</string>
+    <string name="request_access_dialog_btn_send_request">Отправить запрос</string>
+    <string name="childNumber">Номер телефона ребенка</string>
+    <string name="childNumber_discription">Проверьте код страны и введите номер телефона вашего ребенка</string>
+    <string name="enter_with_qr">БЫСТРЫЙ ВХОД ПО QR КОДУ</string>
+    <string name="device_not_bound_dialog_text_1">KidGram не привязан к SafeFamily.\nЕсли у вас не получается привязать KidGram, вы можете обратиться\nв техническую поддержку</string>
+    <string name="privacy_policy_link">https://элариайти.рф/privacy_policy</string>
+    <string name="terms_of_use">https://элариайти.рф/terms_of_use</string>
+    <string name="terms_of_use_text">Пользовательское соглашение</string>
+    <string name="wait">Подождите</string>
+    <string name="log_out">Выйти из аккаунта</string>
+
+    <string name="InviteFriendsHelp">Выберите людей, которых хотите пригласить в KidGram</string>
+    <string name="InviteToTelegram">ПРИГЛАСИТЬ В KIDGRAM</string>
+    <string name="ShareTelegram">Пригласить в KidGram...</string>
+    <string name="get_geolocation">Получение геолокации</string>
+    <string name="get_geolocation_body">Определение вашего местоположения...</string>
 </resources>

@@ -31,7 +31,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.FloatValueHolder;
@@ -39,14 +38,13 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -204,7 +202,6 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
     }
 
     public void setDialog(long uid, boolean checked, CharSequence name) {
-        avatarDrawable.setScaleSize(1f);
         if (uid == Long.MAX_VALUE) {
             nameTextView.setText(repostToCustomName());
             if (repostStoryDrawable == null) {
@@ -250,21 +247,13 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
             if (name != null) {
                 nameTextView.setText(name);
             } else if (chat != null) {
-                if (chat.monoforum) {
-                    nameTextView.setText(ForumUtilities.getMonoForumTitle(currentAccount, chat));
-                } else {
-                    nameTextView.setText(chat.title);
-                }
+                nameTextView.setText(chat.title);
             } else {
                 nameTextView.setText("");
             }
-            if (ChatObject.isMonoForum(chat)) {
-                ForumUtilities.setMonoForumAvatar(currentAccount, chat, avatarDrawable, imageView);
-            } else {
-                avatarDrawable.setInfo(currentAccount, chat);
-                imageView.setForUserOrChat(chat, avatarDrawable);
-            }
-            imageView.setRoundRadius(chat != null && (chat.forum || chat.monoforum)? dp(16) : dp(28));
+            avatarDrawable.setInfo(currentAccount, chat);
+            imageView.setForUserOrChat(chat, avatarDrawable);
+            imageView.setRoundRadius(chat != null && chat.forum ? dp(16) : dp(28));
         }
         currentDialog = uid;
         checkBox.setChecked(checked, false);
@@ -282,10 +271,6 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
     }
 
     public void setTopic(TLRPC.TL_forumTopic topic, boolean animate) {
-        setTopic(topic, false, animate);
-    }
-
-    public void setTopic(TLRPC.TL_forumTopic topic, boolean mono, boolean animate) {
         boolean wasVisible = topicWasVisible;
         boolean visible = topic != null;
         if (wasVisible != visible || !animate) {
@@ -295,11 +280,7 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
             }
 
             if (visible) {
-                if (mono) {
-                    topicTextView.setText(MessagesController.getInstance(currentAccount).getPeerName(DialogObject.getPeerDialogId(topic.from_id)));
-                } else {
-                    topicTextView.setText(ForumUtilities.getTopicSpannedName(topic, topicTextView.getTextPaint(), false));
-                }
+                topicTextView.setText(ForumUtilities.getTopicSpannedName(topic, topicTextView.getTextPaint(), false));
                 topicTextView.requestLayout();
             }
             if (animate) {
@@ -475,14 +456,6 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
         private final Drawable drawable;
 
         public RepostStoryDrawable(Context context, View parentView, boolean animate, Theme.ResourcesProvider resourcesProvider) {
-            this(context, parentView, animate, R.drawable.large_repost_story, resourcesProvider);
-        }
-
-        public RepostStoryDrawable(Context context, View parentView, @DrawableRes int drawableRes, Theme.ResourcesProvider resourcesProvider) {
-            this(context, parentView, false, drawableRes, resourcesProvider);
-        }
-
-        public RepostStoryDrawable(Context context, View parentView, boolean animate, @DrawableRes int drawableRes, Theme.ResourcesProvider resourcesProvider) {
             gradient = new LinearGradient(0, 0, dp(56), dp(56), new int[] {
                 Theme.getColor(Theme.key_stories_circle1, resourcesProvider),
                 Theme.getColor(Theme.key_stories_circle2, resourcesProvider)
@@ -496,7 +469,7 @@ public class ShareDialogCell extends FrameLayout implements NotificationCenter.N
                 drawable = null;
             } else {
                 lottieDrawable = null;
-                drawable = context.getResources().getDrawable(drawableRes).mutate();
+                drawable = context.getResources().getDrawable(R.drawable.large_repost_story).mutate();
                 drawable.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
             }
         }

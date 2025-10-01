@@ -1,6 +1,7 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.getMyLayerVersion;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,7 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
@@ -25,13 +26,12 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.UItem;
-import org.telegram.ui.Components.UniversalAdapter;
-import org.telegram.ui.Components.UniversalRecyclerView;
+import org.telegram.ui.Stars.StarsIntroActivity;
 
 public class PremiumFeatureCell extends FrameLayout {
 
-    public final SimpleTextView title;
-    public final TextView description;
+    private final SimpleTextView title;
+    private final TextView description;
     public ImageView imageView;
     public final ImageView nextIcon;
     boolean drawDivider;
@@ -168,7 +168,7 @@ public class PremiumFeatureCell extends FrameLayout {
         }
 
         @Override
-        public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
+        public void bindView(View view, UItem item, boolean divider) {
             ((PremiumFeatureCell) view).setData((PremiumPreviewFragment.PremiumFeatureData) item.object, divider);
         }
 

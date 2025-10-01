@@ -9,12 +9,12 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.getActivity;
 import static org.telegram.messenger.AndroidUtilities.getTypeface;
 import static org.telegram.messenger.AndroidUtilities.replaceArrows;
 import static org.telegram.messenger.AndroidUtilities.replaceSingleTag;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
-import static org.telegram.messenger.MessagesController.findUpdatesAndRemove;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -46,14 +46,12 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -118,11 +116,24 @@ import com.google.android.play.core.integrity.IntegrityManager;
 import com.google.android.play.core.integrity.IntegrityManagerFactory;
 import com.google.android.play.core.integrity.IntegrityTokenRequest;
 import com.google.android.play.core.integrity.IntegrityTokenResponse;
+import com.google.gson.Gson;
 import com.googlecode.mp4parser.boxes.apple.AppleNameBox;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
+import org.telegram.elari.C;
+import org.telegram.elari.ElariGlobalVar;
+import org.telegram.elari.ElariUtils;
+import org.telegram.elari.SharedPreferencesHelper;
+import org.telegram.elari.elariapi.ElariApiClient;
+import org.telegram.elari.elariapi.pojo.ChatAccess;
+import org.telegram.elari.elariapi.pojo.GetChatsResponse;
+import org.telegram.elari.elariapi.pojo.NewChatRequest;
+import org.telegram.elari.elariapi.pojo.TestCodeResponse;
+import org.telegram.elari.ui.activity.QRLoginActivity;
+import org.telegram.elari.ui.dialogs.BlockChatDialog;
+import org.telegram.elari.ui.dialogs.WaitDialog;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -130,6 +141,7 @@ import org.telegram.messenger.AuthTokensHelper;
 import org.telegram.messenger.BillingController;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.CallReceiver;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
@@ -141,7 +153,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.PushListenerController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
@@ -171,10 +183,8 @@ import org.telegram.ui.Components.CustomPhoneKeyboardView;
 import org.telegram.ui.Components.Easings;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.ImageUpdater;
-import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkPath;
-import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.LoadingDrawable;
 import org.telegram.ui.Components.LoginOrView;
 import org.telegram.ui.Components.OutlineTextContainerView;
@@ -221,12 +231,22 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+    public boolean isTestAccount = false;
+    public String testCode = "";
+    WaitDialog waitDialog = new WaitDialog(getActivity());
+    boolean isMethodGetTestAccCodeStart = false;
+    boolean isNeedStopGetTestAccCodeMethod = false;
+
     public final static boolean ENABLE_PASTED_TEXT_PROCESSING = false;
     private final static int SHOW_DELAY = SharedConfig.getDevicePerformanceClass() <= SharedConfig.PERFORMANCE_CLASS_AVERAGE ? 150 : 100;
 
-    public static final boolean TEST_BACKEND_IN_STORE = false;
+    public static final boolean TEST_BACKEND_IN_STORE = true;
 
     public final static int AUTH_TYPE_MESSAGE = 1,
             AUTH_TYPE_SMS = 2,
@@ -324,7 +344,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private final SlideView[] views = new SlideView[19];
     private CustomPhoneKeyboardView keyboardView;
     private ValueAnimator keyboardAnimator;
-    private boolean paid;
 
     private boolean restoringState;
 
@@ -1650,6 +1669,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         }
         clearCurrentState();
         if (getParentActivity() instanceof LaunchActivity) {
+            try {
+                if(waitDialog != null) {waitDialog.dismiss();}
+                isNeedStopGetTestAccCodeMethod = true;
+            }catch (Exception e){e.printStackTrace();}
             if (newAccount) {
                 newAccount = false;
                 pendingSwitchingAccount = true;
@@ -1789,13 +1812,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         return str.toUpperCase().replaceAll(" ", "_");
     }
 
-    public void open(String phone, TLRPC.auth_SentCode res) {
-        paid = true;
-        Bundle params = new Bundle();
-        params.putString("phone", "+" + phone);
-        params.putString("ephone", "+" + phone);
-        params.putString("phoneFormated", phone);
-        fillNextCodeParams(params, res, true);
+    public void open(TLRPC.auth_SentCode res) {
+        fillNextCodeParams(new Bundle(), res, true);
     }
 
     private boolean isRequestingFirebaseSms;
@@ -1804,8 +1822,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             final TLRPC.TL_auth_sentCodePaymentRequired auth = (TLRPC.TL_auth_sentCodePaymentRequired) res;
             params.putString("product", auth.store_product);
             params.putString("phoneHash", auth.phone_code_hash);
-            params.putString("support_email_address", auth.support_email_address);
-            params.putString("support_email_subject", auth.support_email_subject);
             setPage(VIEW_PAY, true, params, true);
             return;
         }
@@ -1996,6 +2012,49 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
     private TLRPC.TL_help_termsOfService currentTermsOfService;
 
+    private void getTestAccCode(){
+        Log.e("ArtTest", "start method getTestAccCode() "  + isMethodGetTestAccCodeStart);
+        if(isMethodGetTestAccCodeStart){
+            if(waitDialog != null){waitDialog.dismiss();}
+            return;
+        }
+        if(isNeedStopGetTestAccCodeMethod){
+            if(waitDialog != null){waitDialog.dismiss();}
+            return;
+        };
+        waitDialog.show();
+        isMethodGetTestAccCodeStart = true;
+        ElariApiClient.getInstance().getApiService()
+                .getTestCode("debug")
+                .enqueue(new Callback<TestCodeResponse>() {
+                    @Override
+                    public void onResponse(Call<TestCodeResponse> call, Response<TestCodeResponse> response) {
+                        isMethodGetTestAccCodeStart = false;
+                        if (response.body() != null) {
+                            Log.e("ArtTest", "test code  " + response.body());
+                            if((response.body().getError() == 0)&&(response.body().getCode() != null)){
+                                //Код получен
+                                testCode = response.body().getCode();
+                                isNeedStopGetTestAccCodeMethod = true;
+                                Log.e("ArtTest", "isTestAccount  " + isTestAccount + " testCode " + testCode);
+                                waitDialog.dismiss();
+                            }else{
+                                //Ошибка получения кода
+                                new Handler(Looper.getMainLooper()).postDelayed(()->{if(!isNeedStopGetTestAccCodeMethod){getTestAccCode();}}, 3000);
+                            }
+                        }else{
+                            //Ошибка получения кода
+                            new Handler(Looper.getMainLooper()).postDelayed(()->{if(!isNeedStopGetTestAccCodeMethod){getTestAccCode();}}, 3000);
+                        }
+                    }
+                    @Override public void onFailure(Call<TestCodeResponse> call, Throwable t) {
+                        //Ошибка получения кода
+                        isMethodGetTestAccCodeStart = false;
+                        new Handler(Looper.getMainLooper()).postDelayed(()->{if(!isNeedStopGetTestAccCodeMethod){getTestAccCode();}}, 3000);
+                    }
+                });
+    }
+
     public class PhoneView extends SlideView implements AdapterView.OnItemSelectedListener, NotificationCenter.NotificationCenterDelegate {
         private AnimatedPhoneNumberEditText codeField;
         private AnimatedPhoneNumberEditText phoneField;
@@ -2034,13 +2093,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             titleView = new TextView(context);
             titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
             titleView.setTypeface(AndroidUtilities.bold());
-            titleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneNewNumber : R.string.YourNumber));
+            titleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneNewNumber : R.string.childNumber));
             titleView.setGravity(Gravity.CENTER);
             titleView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
             addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 0));
 
             subtitleView = new TextView(context);
-            subtitleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneHelp : R.string.StartText));
+            subtitleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneHelp : R.string.childNumber_discription));
             subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             subtitleView.setGravity(Gravity.CENTER);
             subtitleView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
@@ -2471,9 +2530,24 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 });
             }
 
-            final boolean allowTestBackend = (BuildVars.DEBUG_VERSION || TEST_BACKEND_IN_STORE) || getConnectionsManager().isTestBackend();
+            //Кнопка "Входа по QR-коду"
+//            TextView enterQRView = new TextView(context);
+//            enterQRView.setText(getString(R.string.enter_with_qr));
+//            enterQRView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+//            enterQRView.setGravity(Gravity.CENTER);
+//            enterQRView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
+//            enterQRView.setTextColor(Theme.getColor(Theme.kg_blue_3));
+//            enterQRView.setOnClickListener(v->{
+//                Log.e("ArtTest", "Enter with QR click");
+////                Intent conversationIntent = new Intent(getContext(), QRLoginActivity.class);
+////                getContext().startActivity(conversationIntent);
+//            });
+//            addView(enterQRView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 16, 32, 0));
+
+            final boolean allowTestBackend =  BuildVars.DEBUG_VERSION || TEST_BACKEND_IN_STORE;
             if (allowTestBackend && activityMode == MODE_LOGIN) {
                 testBackendCheckBox = new CheckBoxCell(context, 2);
+                testBackendCheckBox.setVisibility(GONE);
                 testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = getConnectionsManager().isTestBackend(), false);
                 addView(testBackendCheckBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 16, 0, 16 + (LocaleController.isRTL && AndroidUtilities.isSmallScreen() ? Build.VERSION.SDK_INT >= 21 ? 56 : 60 : 0), 0));
                 bottomMargin -= 24;
@@ -2484,12 +2558,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     CheckBoxCell cell = (CheckBoxCell) v;
                     testBackend = !testBackend;
                     cell.setChecked(testBackend, true);
-
-                    boolean testBackend = allowTestBackend && getConnectionsManager().isTestBackend();
-                    if (testBackend != LoginActivity.this.testBackend) {
-                        getConnectionsManager().switchBackend(false);
-                    }
+                    getConnectionsManager().switchBackend(false);
+//                    boolean testBackend = allowTestBackend && getConnectionsManager().isTestBackend();
+//                    if (testBackend != LoginActivity.this.testBackend) {
+//                        getConnectionsManager().switchBackend(false);
+//                    }
                     loadCountries();
+                    Log.e("Arttest", "is test beck - "  + getConnectionsManager().isTestBackend());
                 });
             }
             if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
@@ -2504,18 +2579,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 BufferedReader reader = new BufferedReader(new InputStreamReader(getResources().getAssets().open("countries.txt")));
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    //Log.e("ArtTest", "line " + line);
                     String[] args = line.split(";");
                     CountrySelectActivity.Country countryWithCode = new CountrySelectActivity.Country();
                     countryWithCode.name = args[2];
                     countryWithCode.code = args[0];
                     countryWithCode.shortname = args[1];
-                    if (!TextUtils.equals(countryWithCode.code, "FT")) {
-                        final String localizedName = LocaleController.getCountryName(countryWithCode.shortname);
-                        if (!TextUtils.isEmpty(localizedName) && !TextUtils.equals(countryWithCode.shortname, localizedName)) {
-                            countryWithCode.defaultName = countryWithCode.name;
-                            countryWithCode.name = localizedName;
-                        }
-                    }
                     countriesArray.add(0, countryWithCode);
 
                     List<CountrySelectActivity.Country> countryList = codesMap.get(args[0]);
@@ -2601,7 +2670,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                     }
                                     countryWithCode.code = countryCode.country_code;
                                     countryWithCode.shortname = c.iso2;
-
                                     countriesArray.add(countryWithCode);
                                     List<CountrySelectActivity.Country> countryList = codesMap.get(countryCode.country_code);
                                     if (countryList == null) {
@@ -2614,6 +2682,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                 }
                             }
                         }
+                        CountrySelectActivity.Country countryWithCode = new CountrySelectActivity.Country();
+                        countryWithCode.name = "Telegram Testing System";
+                        countryWithCode.defaultName = "Telegram Testing System";
+                        countryWithCode.code = "999";
+                        countryWithCode.shortname = "TTS";
+                        countriesArray.add(countryWithCode);
+
 
                         if (activityMode == MODE_CHANGE_PHONE_NUMBER) {
                             String number = PhoneFormat.stripExceptNumbers(UserConfig.getInstance(currentAccount).getClientPhone());
@@ -2864,6 +2939,17 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 return;
             }
             String phoneNumber = "+" + codeField.getText() + " " + phoneField.getText();
+
+//TEST BACKEND, если введен тестовый номер, идем за кодом на сервер
+if(phoneNumber.replace(" ", "").equals(C.TEST_PHONE_NUMBER)){
+Log.e("Arttest", "Test number");
+    getTestAccCode();
+    isTestAccount = true;
+    confirmedNumber = true;
+}else{
+    isTestAccount = false;
+}
+
             if (!confirmedNumber) {
                 if (AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y && !isCustomKeyboardVisible() && sizeNotifierFrameLayout.measureKeyboardHeight() > AndroidUtilities.dp(20)) {
                     keyboardHideCallback = () -> postDelayed(()-> onNextPressed(code), 200);
@@ -3892,7 +3978,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         getConnectionsManager().sendRequest(req, null, ConnectionsManager.RequestFlagWithoutLogin);
                         new AlertDialog.Builder(context)
                                 .setTitle(getString(R.string.RestorePasswordNoEmailTitle))
-                                .setMessage(AndroidUtilities.replaceTags(LocaleController.formatString(R.string.DidNotGetTheCodeInfo, phone)))
+                                .setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("DidNotGetTheCodeInfo", R.string.DidNotGetTheCodeInfo, phone)))
                                 .setNeutralButton(getString(R.string.DidNotGetTheCodeHelpButton), (dialog, which) -> {
                                     try {
                                         PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
@@ -3901,79 +3987,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                         Intent mailer = new Intent(Intent.ACTION_SENDTO);
                                         mailer.setData(Uri.parse("mailto:"));
                                         mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{"sms@telegram.org"});
-                                        mailer.putExtra(Intent.EXTRA_SUBJECT, emailPhone + " Android Registration/Login Issue " + version + (paid ? " #paidauth" : ""));
-                                        StringBuilder text = new StringBuilder();
-                                        text.append("Phone: ").append(requestPhone).append("\n");
-                                        try {
-                                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
-                                                final SubscriptionManager subscriptionManager = SubscriptionManager.from(getContext());
-                                                List<SubscriptionInfo> infos = null;
-                                                if (Build.VERSION.SDK_INT >= 30) {
-                                                    infos = subscriptionManager.getCompleteActiveSubscriptionInfoList();
-                                                }
-                                                if ((infos == null || infos.isEmpty()) && Build.VERSION.SDK_INT >= 28) {
-                                                    infos = subscriptionManager.getAccessibleSubscriptionInfoList();
-                                                }
-                                                if (infos == null || infos.isEmpty()) {
-                                                    infos = subscriptionManager.getActiveSubscriptionInfoList();
-                                                }
-                                                if (infos != null) {
-                                                    for (SubscriptionInfo info : infos) {
-                                                        final String number = info.getNumber();
-                                                        if (!TextUtils.isEmpty(number)) {
-                                                            text.append("SIM");
-                                                            text.append(info.getSimSlotIndex());
-                                                            text.append(": ").append(number);
-                                                            if (!TextUtils.isEmpty(info.getCarrierName())) {
-                                                                text.append(" (").append(info.getCarrierName()).append(")");
-                                                            }
-                                                            text.append("\n");
-                                                        }
-                                                    }
-                                                }
-                                            } else {
-                                                try {
-                                                    final TelephonyManager tm = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
-                                                    final String number = tm.getLine1Number();
-                                                    if (!TextUtils.isEmpty(number)) {
-                                                        text.append("SIM: ").append(number).append("\n");
-                                                    }
-                                                } catch (Exception e) {
-                                                    FileLog.e(e);
-                                                }
-                                            }
-                                        } catch (Exception e) {
-                                            FileLog.e(e);
-                                        }
-                                        text.append("App version: ").append(version).append("\n");
-                                        text.append("OS version: SDK ").append(Build.VERSION.SDK_INT).append("\n");
-                                        text.append("Device: ").append(Build.MANUFACTURER + " " + Build.MODEL + " (" + Build.DEVICE + ")").append("\n");
-                                        if (finalNetworkOperator != null) {
-                                            text.append("Operator: ").append(finalNetworkOperator).append("\n");
-                                        }
-                                        text.append("Locale: ").append(Locale.getDefault()).append("\n");
-                                        if (AndroidUtilities.isInAirplaneMode(context)) {
-                                            text.append("In airplane mode\n");
-                                        }
-                                        text.append("Wi-Fi: ").append(AndroidUtilities.isWifiEnabled(context) ? "Enabled" : "Disabled").append("\n");
-                                        if (Build.VERSION.SDK_INT >= 23) {
-                                            try {
-                                                TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-                                                ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                    SignalStrength signal = tm.getSignalStrength();
-                                                    if (signal != null) {
-                                                        text.append("Signal: ").append(signal.getLevel()).append("/4\n");
-                                                    }
-                                                }
-                                            } catch (Exception e) {
-                                                FileLog.e(e);
-                                            }
-                                        }
-                                        if (!TextUtils.isEmpty(lastError)) {
-                                            text.append("Error: ").append(lastError).append("\n");
-                                        }
-                                        mailer.putExtra(Intent.EXTRA_TEXT, text.toString());
+                                        mailer.putExtra(Intent.EXTRA_SUBJECT, "Android registration/login issue " + version + " " + emailPhone);
+                                        mailer.putExtra(Intent.EXTRA_TEXT, "Phone: " + requestPhone + "\nApp version: " + version + "\nOS version: SDK " + Build.VERSION.SDK_INT + "\nDevice Name: " + Build.MANUFACTURER + Build.MODEL + (finalNetworkOperator != null ? "\nOperator: " + finalNetworkOperator : "") + "\nLocale: " + Locale.getDefault() + "\nError: " + lastError);
                                         getContext().startActivity(Intent.createChooser(mailer, "Send email..."));
                                     } catch (Exception e) {
                                         needShowAlert(getString(R.string.AppName), getString("NoMailInstalled", R.string.NoMailInstalled));
@@ -4756,11 +4771,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 default: {
                     TLRPC.TL_auth_signIn req = new TLRPC.TL_auth_signIn();
                     req.phone_number = requestPhone;
-                    req.phone_code = code;
+                    req.phone_code = isTestAccount ? testCode : code;
                     req.phone_code_hash = phoneHash;
                     req.flags |= 1;
                     destroyTimer();
-
+Log.e("ArtTest", "req.phone_code 2 " + req.phone_code);
                     codeFieldContainer.isFocusSuppressed = true;
                     for (CodeNumberField f : codeFieldContainer.codeField) {
                         f.animateFocusedProgress(0);
@@ -4946,15 +4961,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             }
 
             if (!force) {
-                showDialog(new AlertDialog.Builder(getParentActivity())
-                        .setTitle(getString(R.string.EditNumber))
-                        .setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("EditNumberInfo", R.string.EditNumberInfo, phone)))
-                        .setPositiveButton(getString(R.string.Close), null)
-                        .setNegativeButton(getString(R.string.Edit), (dialogInterface, i) -> {
-                            onBackPressed(true);
-                            setPage(VIEW_PHONE_INPUT, true, null, true);
-                        })
-                        .create());
+                //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                showDialog(new AlertDialog.Builder(getParentActivity())
+//                        .setTitle(getString(R.string.EditNumber))
+//                        .setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("EditNumberInfo", R.string.EditNumberInfo, phone)))
+//                        .setPositiveButton(getString(R.string.Close), null)
+//                        .setNegativeButton(getString(R.string.Edit), (dialogInterface, i) -> {
+//                            onBackPressed(true);
+//                            setPage(VIEW_PHONE_INPUT, true, null, true);
+//                        })
+//                        .create());
                 return false;
             }
             nextPressed = false;
@@ -5635,36 +5651,37 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 if (radialProgressView.getTag() != null) {
                     return;
                 }
-                showDialog(new AlertDialog.Builder(getParentActivity())
-                        .setTitle(getString("ResetMyAccountWarning", R.string.ResetMyAccountWarning))
-                        .setMessage(getString("ResetMyAccountWarningText", R.string.ResetMyAccountWarningText))
-                        .setPositiveButton(getString("ResetMyAccountWarningReset", R.string.ResetMyAccountWarningReset), (dialogInterface, i) -> {
-                            needShowProgress(0);
-                            TL_account.deleteAccount req = new TL_account.deleteAccount();
-                            req.reason = "Forgot password";
-                            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                                needHideProgress(false);
-                                if (error == null) {
-                                    if (requestPhone == null || phoneHash == null || phoneCode == null) {
-                                        setPage(VIEW_PHONE_INPUT, true, null, true);
-                                        return;
-                                    }
-
-                                    Bundle params = new Bundle();
-                                    params.putString("phoneFormated", requestPhone);
-                                    params.putString("phoneHash", phoneHash);
-                                    params.putString("code", phoneCode);
-                                    setPage(VIEW_REGISTER, true, params, false);
-                                } else {
-                                    if (error.text.equals("2FA_RECENT_CONFIRM")) {
-                                        needShowAlert(getString(R.string.RestorePasswordNoEmailTitle), getString("ResetAccountCancelledAlert", R.string.ResetAccountCancelledAlert));
-                                    } else {
-                                        needShowAlert(getString(R.string.RestorePasswordNoEmailTitle), error.text);
-                                    }
-                                }
-                            }), ConnectionsManager.RequestFlagWithoutLogin | ConnectionsManager.RequestFlagFailOnServerErrors);
-                        })
-                        .setNegativeButton(getString("Cancel", R.string.Cancel), null).create());
+                //Убираем диалог настроек (ВЕРНУТЬ ЕСЛИ БУДУТ ПРОБЛЕМЫ)
+//                showDialog(new AlertDialog.Builder(getParentActivity())
+//                        .setTitle(getString("ResetMyAccountWarning", R.string.ResetMyAccountWarning))
+//                        .setMessage(getString("ResetMyAccountWarningText", R.string.ResetMyAccountWarningText))
+//                        .setPositiveButton(getString("ResetMyAccountWarningReset", R.string.ResetMyAccountWarningReset), (dialogInterface, i) -> {
+//                            needShowProgress(0);
+//                            TL_account.deleteAccount req = new TL_account.deleteAccount();
+//                            req.reason = "Forgot password";
+//                            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+//                                needHideProgress(false);
+//                                if (error == null) {
+//                                    if (requestPhone == null || phoneHash == null || phoneCode == null) {
+//                                        setPage(VIEW_PHONE_INPUT, true, null, true);
+//                                        return;
+//                                    }
+//
+//                                    Bundle params = new Bundle();
+//                                    params.putString("phoneFormated", requestPhone);
+//                                    params.putString("phoneHash", phoneHash);
+//                                    params.putString("code", phoneCode);
+//                                    setPage(VIEW_REGISTER, true, params, false);
+//                                } else {
+//                                    if (error.text.equals("2FA_RECENT_CONFIRM")) {
+//                                        needShowAlert(getString(R.string.RestorePasswordNoEmailTitle), getString("ResetAccountCancelledAlert", R.string.ResetAccountCancelledAlert));
+//                                    } else {
+//                                        needShowAlert(getString(R.string.RestorePasswordNoEmailTitle), error.text);
+//                                    }
+//                                }
+//                            }), ConnectionsManager.RequestFlagWithoutLogin | ConnectionsManager.RequestFlagFailOnServerErrors);
+//                        })
+//                        .setNegativeButton(getString("Cancel", R.string.Cancel), null).create());
             });
         }
 
@@ -9307,9 +9324,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             TLRPC.TL_auth_signIn req = new TLRPC.TL_auth_signIn();
             req.phone_number = requestPhone;
-            req.phone_code = code;
+            req.phone_code = isTestAccount ? testCode : code;
             req.phone_code_hash = phoneHash;
             req.flags |= 1;
+Log.e("ArtTest", "req.phone_code " + req.phone_code);
             int reqId = getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 needHideProgress(false, true);
 
@@ -9678,7 +9696,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     public class LoginPayView extends SlideView {
 
         private StarParticlesView starParticlesView;
-        private ImageView optionsButton;
         private ButtonWithCounterView button;
 
         private ExplainStarsSheet.FeatureCell[] cells = new ExplainStarsSheet.FeatureCell[3];
@@ -9720,13 +9737,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 }
             };
             topView.addView(starParticlesView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 200, Gravity.FILL));
-
-            optionsButton = new ImageView(context);
-            optionsButton.setImageResource(R.drawable.ic_ab_other);
-            optionsButton.setScaleType(ImageView.ScaleType.CENTER);
-            optionsButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourceProvider), PorterDuff.Mode.SRC_IN));
-            optionsButton.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector)));
-            topView.addView(optionsButton, LayoutHelper.createFrame(32, 32, Gravity.RIGHT | Gravity.TOP, 0, 16, -2, 0));
 
             GLIconTextureView iconTextureView = new GLIconTextureView(context, GLIconRenderer.DIALOG_STYLE, Icon3D.TYPE_COIN) {
                 @Override
@@ -9770,9 +9780,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             cells[2] = new ExplainStarsSheet.FeatureCell(context, ExplainStarsSheet.FeatureCell.STYLE_SHEET);
             cells[2].set(R.drawable.menu_feature_hands, AndroidUtilities.replaceArrows(replaceSingleTag(getString(R.string.SMSFee3Title), () -> {
-                final PremiumPreviewFragment fragment = new PremiumPreviewFragment("sms");
-                fragment.setCurrentAccount(currentAccount);
-                presentFragment(fragment);
+                presentFragment(new PremiumPreviewFragment("sms"));
             }), true, dp(8f / 3f), dp(1)), getString(R.string.SMSFee3Text));
             addView(cells[2], LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0, 0, 6));
 
@@ -9799,107 +9807,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             final String product = params == null ? null : params.getString("product");
             final String phone = params == null ? null : params.getString("phoneFormated");
             final String phoneHash = params == null ? null : params.getString("phoneHash");
-            final String support_email_email = params == null ? null : params.getString("support_email_email");
-            final String support_email_subject = params == null ? null : params.getString("support_email_subject");
-
-            final String[] lastError = new String[1];
-
-            optionsButton.setOnClickListener(v -> {
-                ItemOptions.makeOptions(LoginActivity.this, optionsButton)
-                    .add(R.drawable.msg_help, getString(R.string.SettingsHelp), () -> {
-                        try {
-                            PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
-                            String version = String.format(Locale.US, "%s (%d)", pInfo.versionName, pInfo.versionCode);
-
-                            Intent mailer = new Intent(Intent.ACTION_SENDTO);
-                            mailer.setData(Uri.parse("mailto:"));
-                            if (!TextUtils.isEmpty(support_email_email)) {
-                                mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{support_email_email});
-                            } else {
-                                mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{"sms@telegram.org"});
-                            }
-                            if (!TextUtils.isEmpty(support_email_subject)) {
-                                mailer.putExtra(Intent.EXTRA_SUBJECT, support_email_subject);
-                            } else {
-                                mailer.putExtra(Intent.EXTRA_SUBJECT, "Android Registration/Login Billing Issue #billing_issue");
-                            }
-                            StringBuilder text = new StringBuilder();
-                            try {
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
-                                    final SubscriptionManager subscriptionManager = SubscriptionManager.from(getContext());
-                                    List<SubscriptionInfo> infos = null;
-                                    if (Build.VERSION.SDK_INT >= 30) {
-                                        infos = subscriptionManager.getCompleteActiveSubscriptionInfoList();
-                                    }
-                                    if ((infos == null || infos.isEmpty()) && Build.VERSION.SDK_INT >= 28) {
-                                        infos = subscriptionManager.getAccessibleSubscriptionInfoList();
-                                    }
-                                    if (infos == null || infos.isEmpty()) {
-                                        infos = subscriptionManager.getActiveSubscriptionInfoList();
-                                    }
-                                    if (infos != null) {
-                                        for (SubscriptionInfo info : infos) {
-                                            final String number = info.getNumber();
-                                            if (!TextUtils.isEmpty(number)) {
-                                                text.append("SIM");
-                                                text.append(info.getSimSlotIndex());
-                                                text.append(": ").append(number);
-                                                if (!TextUtils.isEmpty(info.getCarrierName())) {
-                                                    text.append(" (").append(info.getCarrierName()).append(")");
-                                                }
-                                                text.append("\n");
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    try {
-                                        final TelephonyManager tm = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
-                                        final String number = tm.getLine1Number();
-                                        if (!TextUtils.isEmpty(number)) {
-                                            text.append("SIM: ").append(number).append("\n");
-                                        }
-                                    } catch (Exception e) {
-                                        FileLog.e(e);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                FileLog.e(e);
-                            }
-                            text.append("App version: ").append(version).append("\n");
-                            text.append("OS version: SDK ").append(Build.VERSION.SDK_INT).append("\n");
-                            text.append("Device: ").append(Build.MANUFACTURER + " " + Build.MODEL + " (" + Build.DEVICE + ")").append("\n");
-                            text.append("Locale: ").append(Locale.getDefault()).append("\n");
-                            if (AndroidUtilities.isInAirplaneMode(ApplicationLoader.applicationContext)) {
-                                text.append("In airplane mode\n");
-                            }
-                            text.append("Wi-Fi: ").append(AndroidUtilities.isWifiEnabled(ApplicationLoader.applicationContext) ? "Enabled" : "Disabled").append("\n");
-                            if (Build.VERSION.SDK_INT >= 23) {
-                                try {
-                                    TelephonyManager tm = ApplicationLoader.applicationContext.getSystemService(TelephonyManager.class);
-                                    ConnectivityManager cm = ApplicationLoader.applicationContext.getSystemService(ConnectivityManager.class);
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                        SignalStrength signal = tm.getSignalStrength();
-                                        if (signal != null) {
-                                            text.append("Signal: ").append(signal.getLevel()).append("/4\n");
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    FileLog.e(e);
-                                }
-                            }
-                            if (!TextUtils.isEmpty(lastError[0])) {
-                                text.append("Error: ").append(lastError[0]).append("\n");
-                            }
-                            text.append("\n\n#billing_issue");
-                            mailer.putExtra(Intent.EXTRA_TEXT, text.toString());
-                            getContext().startActivity(Intent.createChooser(mailer, "Send email..."));
-                        } catch (Exception e) {
-                            needShowAlert(getString(R.string.AppName), getString("NoMailInstalled", R.string.NoMailInstalled));
-                        }
-                    })
-                    .setGravity(Gravity.RIGHT)
-                    .show();
-            });
 
             button.setEnabled(true);
             button.setOnClickListener(null);
@@ -9926,12 +9833,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     BillingController.getInstance().queryProductDetails(productQueries, (result, list) -> AndroidUtilities.runOnUIThread(() -> {
                         FileLog.d("LoginBilling queried \"" + product + "\" product: " + BillingController.getResponseCodeString(result.getResponseCode()));
                         if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                            lastError[0] = "BILLING_" + BillingController.getResponseCodeString(result.getResponseCode());
                             BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.error, formatString(R.string.UnknownErrorCode, BillingController.getResponseCodeString(result.getResponseCode())));
                             return;
                         }
-                        if (list != null && !list.isEmpty()) {
-                            final ProductDetails productDetails = list.get(0);
+                        if (list != null && !list.getProductDetailsList().isEmpty()) {
+                            final ProductDetails productDetails = list.getProductDetailsList().get(0);
 
                             final ProductDetails.OneTimePurchaseOfferDetails offer = productDetails.getOneTimePurchaseOfferDetails();
 
@@ -9965,7 +9871,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                         FileLog.d("LoginBilling, querying done purchases...");
 
                                         Runnable buy = () -> {
-                                            paid = true;
                                             BillingController.getInstance().addResultListener(productDetails.getProductId(), billingResult2 -> {
                                                 final boolean success = billingResult2.getResponseCode() == BillingClient.BillingResponseCode.OK;
                                                 final String error = success ? null : BillingController.getResponseCodeString(billingResult2.getResponseCode());
@@ -9989,28 +9894,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                                 if (paidList != null && !paidList.isEmpty()) {
                                                     for (Purchase purchase : paidList) {
                                                         if (purchase.getProducts().contains(product)) {
-                                                            final TLRPC.TL_payments_assignPlayMarketTransaction req2 = new TLRPC.TL_payments_assignPlayMarketTransaction();
+                                                            TLRPC.TL_payments_assignPlayMarketTransaction req2 = new TLRPC.TL_payments_assignPlayMarketTransaction();
                                                             req2.receipt = new TLRPC.TL_dataJSON();
                                                             req2.receipt.data = purchase.getOriginalJson();
                                                             purpose.restore = true;
                                                             req2.purpose = purpose;
                                                             getConnectionsManager().sendRequest(req2, (response, error) -> {
                                                                 if (response instanceof TLRPC.Updates) {
-                                                                    for (TLRPC.TL_updateSentPhoneCode u : findUpdatesAndRemove((TLRPC.Updates) response, TLRPC.TL_updateSentPhoneCode.class)) {
-                                                                        AndroidUtilities.runOnUIThread(() -> {
-                                                                            paid = true;
-                                                                            LoginActivity fragment = LaunchActivity.findFragment(LoginActivity.class);
-                                                                            if (fragment == null) {
-                                                                                fragment = new LoginActivity(currentAccount);
-                                                                                BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
-                                                                                if (lastFragment != null) {
-                                                                                    lastFragment.presentFragment(fragment);
-                                                                                }
-                                                                            }
-                                                                            fragment.open(purpose.phone_number, u.sent_code);
-                                                                        });
-                                                                    }
-
                                                                     getMessagesController().processUpdates((TLRPC.Updates) response, false);
 
                                                                     BillingController.getInstance().consumeGiftPurchase(purchase, req.purpose, null);
@@ -10032,15 +9922,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                         }));
                                     });
                                 } else if (res instanceof TLRPC.TL_boolFalse) {
-                                    lastError[0] = "RESPONSE_FALSE";
                                     BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.error, formatString(R.string.UnknownErrorCode, "RESPONSE_FALSE"));
                                 } else if (err != null) {
-                                    lastError[0] = err.text;
                                     BulletinFactory.of(slideViewsContainer, null).showForError(err);
                                 }
                             }), ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagWithoutLogin);
                         } else {
-                            lastError[0] = "PRODUCT_NOT_FOUND";
                             BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.error, formatString(R.string.UnknownErrorCode, "PRODUCT_NOT_FOUND"));
                         }
                     }));

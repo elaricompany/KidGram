@@ -30,10 +30,13 @@ import com.huawei.hms.maps.model.MapStyleOptions;
 import com.huawei.hms.maps.model.Marker;
 import com.huawei.hms.maps.model.MarkerOptions;
 
+import org.telegram.messenger.huawei.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class HuaweiMapsProvider implements IMapsProvider {
     public HuaweiMapsProvider() {

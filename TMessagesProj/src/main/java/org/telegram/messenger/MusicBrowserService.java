@@ -39,6 +39,7 @@ import android.widget.Toast;
 
 import androidx.collection.LongSparseArray;
 
+import org.elarikg.messenger.R;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.tgnet.NativeByteBuffer;
@@ -56,9 +57,9 @@ import javax.annotation.Nullable;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class MusicBrowserService extends MediaBrowserService implements NotificationCenter.NotificationCenterDelegate {
 
-    private static final String SLOT_RESERVATION_SKIP_TO_NEXT = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
-    private static final String SLOT_RESERVATION_SKIP_TO_PREV = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
-    private static final String SLOT_RESERVATION_QUEUE = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
+//    private static final String SLOT_RESERVATION_SKIP_TO_NEXT = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
+//    private static final String SLOT_RESERVATION_SKIP_TO_PREV = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
+//    private static final String SLOT_RESERVATION_QUEUE = "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
 
     @Nullable
     private MediaSession mediaSession;
@@ -115,9 +116,9 @@ public class MusicBrowserService extends MediaBrowserService implements Notifica
         mediaSession.setSessionActivity(pi);
 
         Bundle extras = new Bundle();
-        extras.putBoolean(SLOT_RESERVATION_QUEUE, true);
-        extras.putBoolean(SLOT_RESERVATION_SKIP_TO_PREV, true);
-        extras.putBoolean(SLOT_RESERVATION_SKIP_TO_NEXT, true);
+//        extras.putBoolean(SLOT_RESERVATION_QUEUE, true);
+//        extras.putBoolean(SLOT_RESERVATION_SKIP_TO_PREV, true);
+//        extras.putBoolean(SLOT_RESERVATION_SKIP_TO_NEXT, true);
         mediaSession.setExtras(extras);
     }
 
@@ -571,18 +572,18 @@ public class MusicBrowserService extends MediaBrowserService implements Notifica
             mediaSession.setActive(true);
         }
 
-        final MessageObject messageObject = MediaController.getInstance().getPlayingMessageObject();
+        MessageObject messageObject = MediaController.getInstance().getPlayingMessageObject();
         if (messageObject == null) {
             return;
         }
-        final MediaMetadata.Builder builder = new MediaMetadata.Builder();
+        MediaMetadata.Builder builder = new MediaMetadata.Builder();
         builder.putLong(MediaMetadata.METADATA_KEY_DURATION, (long) (messageObject.getDuration() * 1000));
         builder.putString(MediaMetadata.METADATA_KEY_ARTIST, messageObject.getMusicAuthor());
         builder.putString(MediaMetadata.METADATA_KEY_TITLE, messageObject.getMusicTitle());
         AudioInfo audioInfo = MediaController.getInstance().getAudioInfo();
         if (audioInfo != null) {
             Bitmap bitmap = audioInfo.getCover();
-            if (bitmap != null && !bitmap.isRecycled()) {
+            if (bitmap != null) {
                 builder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
             }
         }

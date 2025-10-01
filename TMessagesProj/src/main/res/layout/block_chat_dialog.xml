@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/background"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/content_blur_light">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/change_profile_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/half_default_padding"
+        android:paddingBottom="@dimen/half_default_padding"
+        android:layout_marginLeft="@dimen/default_padding"
+        android:layout_marginRight="@dimen/default_padding"
+        android:layout_gravity="center"
+        android:background="@drawable/dialog_background_old_style"
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:src="@drawable/ic_lock"
+            android:layout_marginTop="@dimen/default_padding"
+            app:layout_constraintStart_toStartOf="@+id/text_2"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_1"
+            style="@style/header_lvl_1_black"
+            android:textSize="22sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_padding"
+            android:text="@string/request_access_dialog_text_1"
+            app:layout_constraintBottom_toBottomOf="@+id/avatar"
+            app:layout_constraintStart_toEndOf="@+id/avatar"
+            app:layout_constraintTop_toTopOf="@+id/avatar" />
+
+        <TextView
+            android:id="@+id/text_2"
+            style="@style/header_lvl_2_black"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginTop="16dp"
+            android:gravity="start"
+            android:text="@string/request_access_dialog_text_2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/avatar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_marginTop="@dimen/half_default_padding"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_2">
+            <TextView
+                android:id="@+id/btn_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/btnNewKidGramBlue"
+                android:gravity="end"
+                android:paddingEnd="@dimen/default_padding"
+                android:text="@string/request_access_dialog_btn_cancel"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginRight="@dimen/half_default_padding" />
+            <TextView
+                android:id="@+id/btn_send_request"
+                android:gravity="end"
+                android:paddingEnd="@dimen/default_padding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/half_default_padding"
+                style="@style/btnNewKidGramRed"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="@string/request_access_dialog_btn_send_request" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,7 +21,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -573,7 +573,7 @@ public class UniversalAdapter extends AdapterWithDiffUtils {
         if (viewType >= UItem.factoryViewTypeStartsWith) {
             UItem.UItemFactory<?> factory = UItem.findFactory(viewType);
             if (factory != null) {
-                factory.bindView(holder.itemView, item, divider, this, listView instanceof UniversalRecyclerView ? (UniversalRecyclerView) listView : null);
+                factory.bindView(holder.itemView, item, divider);
             }
         } else switch (viewType) {
             case VIEW_TYPE_HEADER:
@@ -589,11 +589,7 @@ public class UniversalAdapter extends AdapterWithDiffUtils {
             case VIEW_TYPE_TOPVIEW:
                 TopViewCell topCell = (TopViewCell) holder.itemView;
                 if (item.iconResId != 0) {
-                    if (item.accent) {
-                        topCell.setEmojiStatic(item.iconResId);
-                    } else {
-                        topCell.setEmoji(item.iconResId);
-                    }
+                    topCell.setEmoji(item.iconResId);
                 } else {
                     topCell.setEmoji(item.subtext.toString(), item.textValue.toString());
                 }

@@ -45,7 +45,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -594,7 +594,7 @@ public class InviteContactsActivity extends BaseFragment implements Notification
         infoTextView.setBackgroundColor(Theme.getColor(Theme.key_contacts_inviteBackground));
         infoTextView.setTextColor(Theme.getColor(Theme.key_contacts_inviteText));
         infoTextView.setGravity(Gravity.CENTER);
-        infoTextView.setText(LocaleController.getString(R.string.InviteFriendsHelp));
+        infoTextView.setText(getContext().getString(R.string.InviteFriendsHelp));
         infoTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         infoTextView.setTypeface(AndroidUtilities.bold());
         infoTextView.setPadding(AndroidUtilities.dp(17), AndroidUtilities.dp(9), AndroidUtilities.dp(17), AndroidUtilities.dp(9));
@@ -778,7 +778,7 @@ public class InviteContactsActivity extends BaseFragment implements Notification
             switch (viewType) {
                 case 1:
                     view = new InviteTextCell(context);
-                    ((InviteTextCell) view).setTextAndIcon(LocaleController.getString(R.string.ShareTelegram), R.drawable.share);
+                    ((InviteTextCell) view).setTextAndIcon(getContext().getString(R.string.ShareTelegram), R.drawable.share);
                     break;
                 default:
                     view = new InviteUserCell(context, true);

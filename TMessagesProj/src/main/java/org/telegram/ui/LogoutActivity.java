@@ -27,7 +27,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -54,7 +54,7 @@ public class LogoutActivity extends BaseFragment {
     private AnimatorSet animatorSet;
 
     private int alternativeHeaderRow;
-    private int addAccountRow;
+    //private int addAccountRow;
     private int passcodeRow;
     private int cacheRow;
     private int phoneRow;
@@ -70,11 +70,11 @@ public class LogoutActivity extends BaseFragment {
 
         rowCount = 0;
         alternativeHeaderRow = rowCount++;
-        if (UserConfig.getActivatedAccountsCount() < UserConfig.MAX_ACCOUNT_COUNT) {
+        /*if (UserConfig.getActivatedAccountsCount() < UserConfig.MAX_ACCOUNT_COUNT) {
             addAccountRow = rowCount++;
         } else {
             addAccountRow = -1;
-        }
+        }*/
         if (SharedConfig.passcodeHash.length() <= 0) {
             passcodeRow = rowCount++;
         } else {
@@ -119,7 +119,7 @@ public class LogoutActivity extends BaseFragment {
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((view, position, x, y) -> {
-            if (position == addAccountRow) {
+            /*if (position == addAccountRow) {
                 int freeAccounts = 0;
                 Integer availableAccount = null;
                 for (int a = UserConfig.MAX_ACCOUNT_COUNT - 1; a >= 0; a--) {
@@ -139,7 +139,7 @@ public class LogoutActivity extends BaseFragment {
                     LimitReachedBottomSheet limitReachedBottomSheet = new LimitReachedBottomSheet(this, getContext(), TYPE_ACCOUNTS, currentAccount, null);
                     showDialog(limitReachedBottomSheet);
                 }
-            } else if (position == passcodeRow) {
+            } else*/ if (position == passcodeRow) {
                 presentFragment(PasscodeActivity.determineOpenFragment());
             } else if (position == cacheRow) {
                 presentFragment(new CacheControlActivity());
@@ -210,9 +210,9 @@ public class LogoutActivity extends BaseFragment {
                 }
                 case 1: {
                     TextDetailSettingsCell view = (TextDetailSettingsCell) holder.itemView;
-                    if (position == addAccountRow) {
+                    /*if (position == addAccountRow) {
                         view.setTextAndValueAndIcon(LocaleController.getString(R.string.AddAnotherAccount), LocaleController.getString(R.string.AddAnotherAccountInfo), R.drawable.msg_contact_add, true);
-                    } else if (position == passcodeRow) {
+                    } else */if (position == passcodeRow) {
                         view.setTextAndValueAndIcon(LocaleController.getString(R.string.SetPasscode), LocaleController.getString(R.string.SetPasscodeInfo), R.drawable.msg_permissions, true);
                     } else if (position == cacheRow) {
                         view.setTextAndValueAndIcon(LocaleController.getString(R.string.ClearCache), LocaleController.getString(R.string.ClearCacheInfo), R.drawable.msg_clearcache, true);
@@ -244,7 +244,7 @@ public class LogoutActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int position = holder.getAdapterPosition();
-            return position == addAccountRow || position == passcodeRow || position == cacheRow || position == phoneRow || position == supportRow || position == logoutRow;
+            return /*position == addAccountRow ||*/ position == passcodeRow || position == cacheRow || position == phoneRow || position == supportRow || position == logoutRow;
         }
 
         @Override
@@ -287,7 +287,7 @@ public class LogoutActivity extends BaseFragment {
         public int getItemViewType(int position) {
             if (position == alternativeHeaderRow) {
                 return 0;
-            } else if (position == addAccountRow || position == passcodeRow || position == cacheRow || position == phoneRow || position == supportRow) {
+            } else if (/*position == addAccountRow ||*/ position == passcodeRow || position == cacheRow || position == phoneRow || position == supportRow) {
                 return 1;
             } else if (position == alternativeSectionRow) {
                 return 2;

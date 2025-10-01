@@ -95,7 +95,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -3426,7 +3426,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                     } else {
                         pinnedTop = false;
                     }
-                    messageCell.setMessageObject(message, null, pinnedBotton, pinnedTop, false);
+                    messageCell.setMessageObject(message, null, pinnedBotton, pinnedTop);
                     messageCell.setHighlighted(false);
                     messageCell.setHighlightedText(searchQuery);
                 } else if (view instanceof ChatActionCell) {

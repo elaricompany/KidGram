@@ -92,7 +92,11 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.json.JSONObject;
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -110,7 +114,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.StatsController;
 import org.telegram.messenger.UserConfig;
@@ -365,7 +369,6 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 	private boolean needSendDebugLog;
 	private boolean needRateCall;
-	private String lastLogFilePath;
 	private long lastTypingTimeSend;
 
 	private boolean endCallAfterRequest;
@@ -1098,7 +1101,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				reqCall.protocol.udp_reflector = true;
 				reqCall.protocol.min_layer = CALL_MIN_LAYER;
 				reqCall.protocol.max_layer = Instance.getConnectionMaxLayer();
-				Collections.addAll(reqCall.protocol.library_versions, NativeInstance.getAllVersions());
+				reqCall.protocol.library_versions.addAll(Instance.AVAILABLE_VERSIONS);
 				VoIPService.this.g_a = g_a;
 				reqCall.g_a_hash = Utilities.computeSHA256(g_a, 0, g_a.length);
 				reqCall.random_id = Utilities.random.nextInt();
@@ -1676,10 +1679,6 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			if (BuildVars.LOGS_ENABLED) {
 				FileLog.d("call discarded, stopping service");
 			}
-			final MessagesController messagesController = MessagesController.getInstance(currentAccount);
-			if (messagesController.voipDebug != null) {
-				messagesController.voipDebug.done(phoneCall.id, phoneCall.need_debug);
-			}
 			if (phoneCall.reason instanceof TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall) {
 				final TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall reason = (TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall) phoneCall.reason;
 				joinConference = new TLRPC.TL_inputGroupCallSlug();
@@ -1860,7 +1859,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		req.protocol.max_layer = Instance.getConnectionMaxLayer();
 		req.protocol.min_layer = CALL_MIN_LAYER;
 		req.protocol.udp_p2p = req.protocol.udp_reflector = true;
-		Collections.addAll(req.protocol.library_versions, NativeInstance.getAllVersions());
+		req.protocol.library_versions.addAll(Instance.AVAILABLE_VERSIONS);
 		ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
 			if (error != null) {
 				callFailed();
@@ -3402,8 +3401,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			final boolean enableNs = !(sysNsAvailable && serverConfig.useSystemNs);
 			final String logFilePath = BuildVars.DEBUG_VERSION ? VoIPHelper.getLogFilePath("voip" + privateCall.id) : VoIPHelper.getLogFilePath("" + privateCall.id, false);
 			final String statsLogFilePath = VoIPHelper.getLogFilePath("" + privateCall.id, true);
-			final Instance.Config config = new Instance.Config(initializationTimeout, receiveTimeout, voipDataSaving, privateCall.p2p_allowed, enableAec, enableNs, true, false, serverConfig.enableStunMarking, logFilePath, statsLogFilePath, privateCall.protocol.max_layer, privateCall.custom_parameters == null ? "" : privateCall.custom_parameters.data);
-			lastLogFilePath = logFilePath;
+			final Instance.Config config = new Instance.Config(initializationTimeout, receiveTimeout, voipDataSaving, privateCall.p2p_allowed, enableAec, enableNs, true, false, serverConfig.enableStunMarking, logFilePath, statsLogFilePath, privateCall.protocol.max_layer);
 
 			// persistent state
 			final String persistentStateFilePath = new File(ApplicationLoader.applicationContext.getCacheDir(), "voip_persistent_state.json").getAbsolutePath();
@@ -3971,6 +3969,16 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void showNotification(String name, Bitmap photo) {
+//		Log.e("Arttest", "showNotification call ");
+//		long chatId = 0;
+//		if (chat != null) {
+//			chatId = chat.id;
+//		} else if (user != null) {
+//			chatId = user.id;
+//		}
+//		Log.e("Arttest", "showNotification call " + chatId);
+//		if(ElariUtils.getAccess(chatId) != C.ACCESS_ALLOWED){return;}
+
 		Intent intent = new Intent(this, LaunchActivity.class).setAction(groupCall != null ? "voip_chat" : "voip");
 		if (groupCall != null) {
 			intent.putExtra("currentAccount", currentAccount);
@@ -4348,7 +4356,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				req1.protocol.udp_p2p = req1.protocol.udp_reflector = true;
 				req1.protocol.min_layer = CALL_MIN_LAYER;
 				req1.protocol.max_layer = Instance.getConnectionMaxLayer();
-				Collections.addAll(req1.protocol.library_versions, NativeInstance.getAllVersions());
+				req1.protocol.library_versions.addAll(Instance.AVAILABLE_VERSIONS);
 				ConnectionsManager.getInstance(currentAccount).sendRequest(req1, (response1, error1) -> AndroidUtilities.runOnUIThread(() -> {
 					if (error1 == null) {
 						if (BuildVars.LOGS_ENABLED) {
@@ -4480,6 +4488,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void startRinging() {
+		//if((user!=null)&&(ElariUtils.getAccess(user.id) != C.ACCESS_ALLOWED)){return;}
+
 		if (currentState == STATE_WAITING_INCOMING) {
 			return;
 		}
@@ -4581,7 +4591,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void onTgVoipStop(Instance.FinalState finalState) {
-		if (user == null || privateCall == null || finalState == null) {
+		if (user == null) {
 			return;
 		}
 		if (TextUtils.isEmpty(finalState.debugLog)) {
@@ -4591,15 +4601,18 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				e.printStackTrace();
 			}
 		}
-		final MessagesController messagesController = MessagesController.getInstance(currentAccount);
-		if (messagesController.voipDebug == null) {
-			messagesController.voipDebug = new VoIPDebugToSend(currentAccount);
-		}
-		messagesController.voipDebug.push(privateCall.id, privateCall.access_hash, finalState, lastLogFilePath);
-		lastLogFilePath = null;
-
-		if (needSendDebugLog) {
-			messagesController.voipDebug.done(privateCall.id, needSendDebugLog);
+		if (needSendDebugLog && finalState.debugLog != null) {
+			TL_phone.saveCallDebug req = new TL_phone.saveCallDebug();
+			req.debug = new TLRPC.TL_dataJSON();
+			req.debug.data = finalState.debugLog;
+			req.peer = new TLRPC.TL_inputPhoneCall();
+			req.peer.access_hash = privateCall.access_hash;
+			req.peer.id = privateCall.id;
+			ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
+				if (BuildVars.LOGS_ENABLED) {
+					FileLog.d("Sent debug logs, response = " + response);
+				}
+			});
 			needSendDebugLog = false;
 		}
 	}
@@ -4677,6 +4690,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			}
 			callFailed();
 		}
+
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			if (callIShouldHavePutIntoIntent != null) {
 				NotificationsController.checkOtherNotificationsChannel();
@@ -4708,6 +4723,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				}
 			}
 		}
+
 	}
 
 	private void checkUpdateBluetoothHeadset() {
@@ -5155,6 +5171,17 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void showIncomingNotification(String name, TLObject userOrChat, boolean video, int additionalMemberCount) {
+//		Log.e("Arttest", "showIncomingNotification call");
+//		long chatId = 0;
+//		if (userOrChat instanceof TLRPC.User) {
+//			chatId = ((TLRPC.User)userOrChat).id;
+//		} else if (userOrChat instanceof TLRPC.Chat) {
+//			chatId = ((TLRPC.Chat)userOrChat).id;
+//		}
+//		Log.e("Arttest", "showIncomingNotification call " + chatId);
+//		if(ElariUtils.getAccess(chatId) != C.ACCESS_ALLOWED){return;}
+
+
 		Intent intent = new Intent(this, LaunchActivity.class);
 		intent.setAction("voip");
 

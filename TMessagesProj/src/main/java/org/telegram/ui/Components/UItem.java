@@ -5,8 +5,12 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.LongSparseArray;
+import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.view.View;
+import android.widget.FrameLayout;
 
+import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -21,6 +25,7 @@ import org.telegram.ui.ChannelMonetizationLayout;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.StatisticActivity;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -43,7 +48,6 @@ public class UItem extends AdapterWithDiffUtils.Item {
     public String[] texts;
     public boolean accent, red, transparent, locked;
     public int spanCount = MAX_SPAN_COUNT;
-    public int parentSpanCount;
 
     public boolean include;
     public long dialogId;
@@ -137,14 +141,6 @@ public class UItem extends AdapterWithDiffUtils.Item {
         UItem i = new UItem(UniversalAdapter.VIEW_TYPE_TOPVIEW, false);
         i.text = text;
         i.iconResId = lottieResId;
-        return i;
-    }
-
-    public static UItem asTopViewStatic(CharSequence text, int iconResId) {
-        UItem i = new UItem(UniversalAdapter.VIEW_TYPE_TOPVIEW, false);
-        i.text = text;
-        i.accent = true;
-        i.iconResId = iconResId;
         return i;
     }
 
@@ -680,7 +676,7 @@ public class UItem extends AdapterWithDiffUtils.Item {
             return null;
         }
 
-        public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
+        public void bindView(View view, UItem item, boolean divider) {
 
         }
 

@@ -43,6 +43,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.telegram.elari.C;
+import org.telegram.elari.ElariUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
@@ -51,10 +53,10 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.voip.ConferenceCall;
+import org.elarikg.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_phone;
@@ -1298,8 +1300,14 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 					position -= callsStartRow;
 					CallLogRow row = calls.get(position);
 
+
 					CallCell cell = (CallCell) holder.itemView;
 					cell.imageView.setImageResource(row.video ? R.drawable.profile_video : R.drawable.profile_phone);
+					cell.imageView.setVisibility(View.GONE);
+					if(row.users!=null){
+						int access = ElariUtils.getAccess(row.users.get(0) != null ? row.users.get(0).id : 0);
+						cell.imageView.setVisibility(access == C.ACCESS_ALLOWED ? View.VISIBLE : View.GONE);
+					}
 					TLRPC.Message last = row.calls.get(0);
 					SpannableString subtitle;
 					String ldir = LocaleController.isRTL ? "\u202b" : "";

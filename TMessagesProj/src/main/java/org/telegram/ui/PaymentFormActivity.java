@@ -104,7 +104,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
@@ -530,10 +530,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             try {
                 if ((currentStep == STEP_PAYMENT_INFO || currentStep == STEP_SET_PASSWORD_EMAIL) && !paymentForm.invoice.test) {
                     getParentActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-                    AndroidUtilities.logFlagSecure();
                 } else if (SharedConfig.passcodeHash.length() == 0 || SharedConfig.allowScreenCapture) {
                     getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                    AndroidUtilities.logFlagSecure();
                 }
             } catch (Throwable e) {
                 FileLog.e(e);
@@ -3229,7 +3227,6 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
         try {
             if ((currentStep == STEP_PAYMENT_INFO || currentStep == STEP_SET_PASSWORD_EMAIL) && Build.VERSION.SDK_INT >= 23 && (SharedConfig.passcodeHash.length() == 0 || SharedConfig.allowScreenCapture)) {
                 getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                AndroidUtilities.logFlagSecure();
             }
         } catch (Throwable e) {
             FileLog.e(e);

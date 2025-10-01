@@ -31,7 +31,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
@@ -636,8 +636,7 @@ public class ChatLinkActivity extends BaseFragment implements NotificationCenter
                 chats = res.chats;
                 Iterator<TLRPC.Chat> i = chats.iterator();
                 while (i.hasNext()) {
-                    TLRPC.Chat chat = i.next();
-                    if (ChatObject.isForum(chat) || ChatObject.isMonoForum(chat))
+                    if (ChatObject.isForum(i.next()))
                         i.remove();
                 }
             }

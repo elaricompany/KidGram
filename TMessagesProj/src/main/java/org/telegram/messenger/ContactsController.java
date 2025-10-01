@@ -31,6 +31,7 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
+import org.elarikg.messenger.R;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -371,16 +372,23 @@ public class ContactsController extends BaseController {
     }
 
     public String getInviteText(int contacts) {
-        String link = inviteLink == null ? "https://telegram.org/dl" : inviteLink;
-        if (contacts <= 1) {
-            return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
-        } else {
-            try {
-                return String.format(LocaleController.getPluralString("InviteTextNum", contacts), contacts, link);
-            } catch (Exception e) {
-                return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
-            }
-        }
+        //String link = inviteLink == null ? "https://telegram.org/dl" : inviteLink;
+        //String link = "https://kidgram.org";
+        String link = "https://www.rustore.ru/catalog/app/net.elari.kidgram";
+        return ApplicationLoader.applicationContext.getResources().getString(R.string.Kg_invite_text, link);
+//        if (contacts <= 1) {
+//            //LocaleController.getString(R.string.PasswordEmailInvalid, 1);
+//            //return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
+//            return String.format(LocaleController.getPluralString(R.string.PasswordEmailInvalid), contacts, link);
+//        } else {
+//            try {
+//                //return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
+//                return String.format(LocaleController.getPluralString("InviteTextNum", contacts), contacts, link);
+//            } catch (Exception e) {
+//                //return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
+//                return String.format(LocaleController.getPluralString("InviteTextNum", contacts), contacts, link);
+//            }
+//        }
     }
 
     public void checkAppAccount() {
@@ -2669,43 +2677,43 @@ public class ContactsController extends BaseController {
 
             switch (num) {
                 case PRIVACY_RULES_TYPE_LASTSEEN:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStatusTimestamp;
+                    req.key = new TLRPC.TL_inputPrivacyKeyStatusTimestamp();
                     break;
                 case PRIVACY_RULES_TYPE_INVITE:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyChatInvite;
+                    req.key = new TLRPC.TL_inputPrivacyKeyChatInvite();
                     break;
                 case PRIVACY_RULES_TYPE_CALLS:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneCall;
+                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneCall();
                     break;
                 case PRIVACY_RULES_TYPE_P2P:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneP2P;
+                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneP2P();
                     break;
                 case PRIVACY_RULES_TYPE_PHOTO:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyProfilePhoto;
+                    req.key = new TLRPC.TL_inputPrivacyKeyProfilePhoto();
                     break;
                 case PRIVACY_RULES_TYPE_BIO:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAbout;
+                    req.key = new TLRPC.TL_inputPrivacyKeyAbout();
                     break;
                 case PRIVACY_RULES_TYPE_FORWARDS:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyForwards;
+                    req.key = new TLRPC.TL_inputPrivacyKeyForwards();
                     break;
                 case PRIVACY_RULES_TYPE_PHONE:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneNumber;
+                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneNumber();
                     break;
                 case PRIVACY_RULES_TYPE_VOICE_MESSAGES:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyVoiceMessages;
+                    req.key = new TLRPC.TL_inputPrivacyKeyVoiceMessages();
                     break;
                 case PRIVACY_RULES_TYPE_BIRTHDAY:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyBirthday;
+                    req.key = new TLRPC.TL_inputPrivacyKeyBirthday();
                     break;
                 case PRIVACY_RULES_TYPE_GIFTS:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStarGiftsAutoSave;
+                    req.key = new TLRPC.TL_inputPrivacyKeyStarGiftsAutoSave();
                     break;
                 case PRIVACY_RULES_TYPE_NO_PAID_MESSAGES:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyNoPaidMessages;
+                    req.key = new TLRPC.TL_inputPrivacyKeyNoPaidMessages();
                     break;
                 case PRIVACY_RULES_TYPE_ADDED_BY_PHONE:
-                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAddedByPhone;
+                    req.key = new TLRPC.TL_inputPrivacyKeyAddedByPhone();
                     break;
                 default:
                     continue;

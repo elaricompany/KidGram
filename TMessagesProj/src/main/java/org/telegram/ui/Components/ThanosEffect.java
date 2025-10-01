@@ -29,7 +29,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.Cells.BaseCell;
@@ -1179,14 +1179,11 @@ public class ThanosEffect extends TextureView {
                     ((ChatMessageCell) view).drawingToBitmap = true;
                 }
                 if (view instanceof ChatActionCell && ((ChatActionCell) view).hasGradientService()) {
-                    canvas.save();
-                    canvas.translate(((ChatActionCell) view).sideMenuWidth / 2.0f, view.getPaddingTop());
                     ((ChatActionCell) view).drawBackground(canvas, true);
                     ((ChatActionCell) view).drawReactions(canvas, true, null);
-                    canvas.restore();
                 } else if (view instanceof ChatMessageCell && ((ChatMessageCell) view).drawBackgroundInParent()) {
                     canvas.save();
-                    canvas.translate(0, view.getPaddingTop());
+                    canvas.translate(0, ((ChatMessageCell) view).getPaddingTop());
                     ((ChatMessageCell) view).drawBackgroundInternal(canvas, true);
                     canvas.restore();
                 }

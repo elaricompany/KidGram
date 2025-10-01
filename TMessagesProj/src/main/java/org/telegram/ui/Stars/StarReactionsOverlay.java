@@ -17,7 +17,7 @@ import android.view.ViewConfiguration;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
@@ -143,7 +143,7 @@ public class StarReactionsOverlay extends View {
                 }
                 new StarsIntroActivity.StarsNeededSheet(chatActivity.getContext(), chatActivity.getResourceProvider(), totalStars, StarsIntroActivity.StarsNeededSheet.TYPE_REACTIONS, name, () -> {
                     starsController.sendPaidReaction(msg, chatActivity, totalStars, true, true, null);
-                }, 0).show();
+                }).show();
             }
         }
     }

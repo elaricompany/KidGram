@@ -42,7 +42,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.camera.CameraView;
 import org.telegram.messenger.video.VideoPlayerHolderBase;
@@ -1329,10 +1329,8 @@ public class CollageLayoutView2 extends FrameLayout implements ItemOptions.Scrim
         } else {
             fastSeek = false;
         }
-        if (preview) {
-            AndroidUtilities.cancelRunOnUIThread(syncRunnable);
-            syncRunnable.run();
-        }
+        AndroidUtilities.cancelRunOnUIThread(syncRunnable);
+        syncRunnable.run();
     }
 
     public boolean isPlaying() {
@@ -1374,10 +1372,8 @@ public class CollageLayoutView2 extends FrameLayout implements ItemOptions.Scrim
         final long now = System.currentTimeMillis();
         previewStartTime = now - progress;
         fastSeek = fast;
-        if (preview) {
-            AndroidUtilities.cancelRunOnUIThread(syncRunnable);
-            syncRunnable.run();
-        }
+        AndroidUtilities.cancelRunOnUIThread(syncRunnable);
+        syncRunnable.run();
     }
 
     private final Runnable syncRunnable = () -> {

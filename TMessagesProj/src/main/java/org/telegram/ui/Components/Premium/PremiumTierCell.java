@@ -23,7 +23,7 @@ import org.telegram.messenger.BillingController;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CheckBoxBase;
@@ -250,11 +250,7 @@ public class PremiumTierCell extends ViewGroup {
 
         switch (tier.getMonths()) {
             default:
-                titleView.setText(
-                    tier.getMonths() > 12 && tier.getMonths() % 12 == 0 ?
-                        LocaleController.formatPluralString("PremiumTierAnnualYears", tier.getMonths() / 12) :
-                        LocaleController.formatPluralString("Months", tier.getMonths())
-                );
+                titleView.setText(LocaleController.formatPluralString("Months", tier.getMonths()));
                 break;
             case 12:
                 titleView.setText(LocaleController.getString(R.string.PremiumTierAnnual));

@@ -31,7 +31,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
@@ -78,7 +78,6 @@ public class ExternalActionActivity extends Activity implements INavigationLayou
         if (SharedConfig.passcodeHash.length() > 0 && !SharedConfig.allowScreenCapture) {
             try {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-                AndroidUtilities.logFlagSecure();
             } catch (Exception e) {
                 FileLog.e(e);
             }

@@ -14,7 +14,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
@@ -32,7 +32,7 @@ public class GallerySheet extends BottomSheet {
         super(context, false, resourcesProvider);
 
         fixNavigationBar(0xff1f1f1f);
-        listView = new GalleryListView(UserConfig.selectedAccount, context, new DarkThemeResourceProvider(), null, onlyPhotos, aspectRatio, false, false) {
+        listView = new GalleryListView(UserConfig.selectedAccount, context, new DarkThemeResourceProvider(), null, onlyPhotos, aspectRatio) {
             @Override
             public String getTitle() {
                 return title;

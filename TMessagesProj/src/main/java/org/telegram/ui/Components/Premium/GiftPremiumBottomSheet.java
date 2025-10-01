@@ -31,7 +31,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -192,7 +192,7 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
                 BillingController.getInstance().queryProductDetails(products, (billingResult, list) -> {
                     long pricePerMonthMaxStore = 0;
 
-                    for (ProductDetails details : list) {
+                    for (ProductDetails details : list.getProductDetailsList()) {
                         for (GiftTier giftTier : giftTiers) {
                             if (giftTier.giftOption.store_product != null && giftTier.giftOption.store_product.equals(details.getProductId())) {
                                 giftTier.setGooglePlayProductDetails(details);

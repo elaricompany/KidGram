@@ -24,7 +24,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;

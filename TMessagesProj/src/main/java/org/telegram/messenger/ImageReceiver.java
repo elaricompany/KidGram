@@ -35,6 +35,7 @@ import androidx.annotation.Keep;
 
 import com.google.android.exoplayer2.util.Log;
 
+import org.telegram.elari.ElariUtils;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedFileDrawable;
@@ -494,6 +495,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                 location = ImageLocation.getForUserOrChat(object, ImageLocation.TYPE_BIG);
                 filter = "100_100";
             }
+
             if (videoLocation != null) {
                 setImage(videoLocation, "avatar", location, filter, null, null, strippedBitmap, 0, null, parentObject, 0);
                 animatedFileDrawableRepeatMaxCount = 3;

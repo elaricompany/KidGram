@@ -20,7 +20,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
-import org.telegram.messenger.R;
+import org.elarikg.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -149,7 +149,7 @@ public class BotShareSheet extends BottomSheetWithRecyclerListView {
                 return false;
             }
         });
-        messageCell.setMessageObject(messageObject, null, false, false, false);
+        messageCell.setMessageObject(messageObject, null, false, false);
 
         chatListView = new LinearLayout(context);
         chatListView.setOrientation(LinearLayout.VERTICAL);

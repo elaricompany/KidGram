@@ -111,7 +111,7 @@ public class BetaUpdaterController {
             return;
         }
 
-        final String url = org.telegram.messenger.BuildConfig.BETA_URL;
+        final String url = org.elarikg.messenger.BuildConfig.BETA_URL;
         checkingForUpdate = true;
         firstCheck = false;
         new HttpGetTask(str -> AndroidUtilities.runOnUIThread(() -> {
